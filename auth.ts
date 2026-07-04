@@ -104,6 +104,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.organization = orgMember;
         token.onBoardingComplete = !!orgMember;
       }
+
+      // If token says onboarding is not complete, double check the DB
+      // just in case they completed it in another tab or the session wasn't updated
+      if (!token.onBoardingComplete && token.id) {
+        const orgMember = await prisma.organizationMember.findFirst({
+          where: { userId: token.id as string },
+          include: { Organization: true },
+        });
+        if (orgMember) {
+          token.orgId = orgMember.organizationId;
+          token.orgTitle = orgMember.title;
+          token.orgRole = orgMember.role;
+          token.organization = orgMember;
+          token.onBoardingComplete = true;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
