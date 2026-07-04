@@ -7,7 +7,13 @@ import ws from 'ws';
 neonConfig.webSocketConstructor = ws;
 
 const prismaClientSingleton = () => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error(
+      "DATABASE_URL is not defined in the environment. Please check Vercel Environment Variables."
+    );
+  }
+  const pool = new Pool({ connectionString });
   // Pool types might mismatch between @neondatabase/serverless and @prisma/adapter-neon
   const adapter = new PrismaNeon(pool as any);
   return new PrismaClient({ adapter });
