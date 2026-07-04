@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-;
 import Card from "@/components/Card";
 import InvoiceLogo from "@/assets/icons/invoice.svg";
 import PersonLogo from "@/assets/icons/person.svg";
@@ -28,8 +27,8 @@ const quickAccess = [
   },
   {
     icon: FolderLogo,
-    heading: "New Project",
-    description: "Set up a workspace for active work",
+    heading: "View Project",
+    description: "Your workspace for active work",
     href: "/projects",
   },
 ];
@@ -56,7 +55,8 @@ const Dashboard = () => {
             {quickAccess.map((quick) => {
               const Icon = quick.icon;
               return (
-                <Link href={quick.href}
+                <Link
+                  href={quick.href}
                   className="flex flex-col justify-between w-full lg:w-[18em] xl:w-auto h-[14em] p-6 border border-white/5 hover:border-white/50 bg-neutral-800/10 hover:bg-neutral-50 hover:text-black group rounded-xl transition-all duration-500 ease-in-out cursor-pointer"
                   key={quick.heading}
                 >
