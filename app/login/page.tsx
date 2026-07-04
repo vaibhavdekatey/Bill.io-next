@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-;
 import CustomGoogleButton from "@/components/CustomGoogleButton";
 
 const Login = () => {
@@ -21,7 +20,7 @@ const Login = () => {
     try {
       const result = await login(email, password);
       console.log(result);
-      router.push(result.onBoardingComplete ? "/dashboard" : "/onBoarding");
+      router.push(result.onBoardingComplete ? "/dashboard" : "/onboarding");
     } catch (error: any) {
       setError(error.response?.data?.message || "Login Failed");
     }

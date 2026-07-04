@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-;
 import CustomGoogleButton from "@/components/CustomGoogleButton";
 
 const Register = () => {
@@ -28,7 +27,7 @@ const Register = () => {
 
     try {
       await register(name, email, password);
-      router.push(onBoardingComplete ? "/dashboard" : "/onBoarding");
+      router.push(onBoardingComplete ? "/dashboard" : "/onboarding");
     } catch (error: any) {
       setError(error.response?.data?.message || "Registration Failed");
     }
@@ -64,7 +63,9 @@ const Register = () => {
             </svg>
             Back
           </a>
-          <h2 className="font-thin text-white/80 text-5xl sm:text-7xl mb-6">Sign up</h2>
+          <h2 className="font-thin text-white/80 text-5xl sm:text-7xl mb-6">
+            Sign up
+          </h2>
           <span className="text-white/60 mb-6 font-light tracking-wide ">
             Already have an account?{" "}
             <a href="/login" className="text-white underline">
