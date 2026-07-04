@@ -42,12 +42,13 @@ interface AuthContextType {
   onBoardingComplete: boolean;
   setOnboardingComplete: (value: boolean) => void;
   organization: organization | null;
+  update: (data?: any) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -130,6 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setOnboardingComplete,
         onBoardingComplete,
         organization,
+        update,
       }}
     >
       {children}

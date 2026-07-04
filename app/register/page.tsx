@@ -14,6 +14,7 @@ const Register = () => {
   const [confPassword, setConfPassword] = useState("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const passwordError =
     confPassword && password !== confPassword ? "Passwords do not match" : "";
@@ -26,10 +27,12 @@ const Register = () => {
     }
 
     try {
+      setLoading(true);
       await register(name, email, password);
       router.push(onBoardingComplete ? "/dashboard" : "/onboarding");
     } catch (error: any) {
       setError(error.response?.data?.message || "Registration Failed");
+      setLoading(false);
     }
   };
 
@@ -192,9 +195,10 @@ const Register = () => {
             </div>
             <button
               type="submit"
-              className="bg-white/90 border border-white/30 hover:bg-neutral-800 text-black hover:text-white tracking-wider duration-700 transition-all rounded-lg px-8 py-3 inline-block w-full text-lg text-center cursor-pointer "
+              disabled={loading}
+              className="bg-white/90 border border-white/30 hover:bg-neutral-800 text-black hover:text-white tracking-wider duration-700 transition-all rounded-lg px-8 py-3 inline-block w-full text-lg text-center cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Sign up
+              {loading ? "Signing up..." : "Sign up"}
             </button>
           </form>
           {passwordError && (

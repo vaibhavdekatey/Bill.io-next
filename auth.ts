@@ -84,7 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         
@@ -103,6 +103,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.orgRole = orgMember?.role;
         token.organization = orgMember;
         token.onBoardingComplete = !!orgMember;
+      }
+
+      if (trigger === "update" && token.id) {
+        const orgMember = await prisma.organizationMember.findFirst({
+          where: { userId: token.id as string },
+          include: { Organization: true },
+        });
+        if (orgMember) {
+          token.orgId = orgMember.organizationId;
+          token.orgTitle = orgMember.title;
+          token.orgRole = orgMember.role;
+          token.organization = orgMember;
+          token.onBoardingComplete = true;
+        }
       }
 
       // If token says onboarding is not complete, double check the DB

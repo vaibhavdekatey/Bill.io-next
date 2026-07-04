@@ -27,7 +27,7 @@ const quickAccess = [
   },
   {
     icon: FolderLogo,
-    heading: "View Project",
+    heading: "View Projects",
     description: "Your workspace for active work",
     href: "/projects",
   },

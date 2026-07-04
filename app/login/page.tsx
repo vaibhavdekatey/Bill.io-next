@@ -14,15 +14,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const result = await login(email, password);
       console.log(result);
       router.push(result.onBoardingComplete ? "/dashboard" : "/onboarding");
     } catch (error: any) {
       setError(error.response?.data?.message || "Login Failed");
+      setLoading(false);
     }
   };
 
@@ -130,9 +133,10 @@ const Login = () => {
             </div>
             <button
               type="submit"
-              className="bg-white/90 border border-white/30 hover:bg-neutral-800 text-black hover:text-white tracking-wider duration-700 transition-all rounded-lg px-8 py-3 inline-block w-full text-lg text-center cursor-pointer "
+              disabled={loading}
+              className="bg-white/90 border border-white/30 hover:bg-neutral-800 text-black hover:text-white tracking-wider duration-700 transition-all rounded-lg px-8 py-3 inline-block w-full text-lg text-center cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Log in
+              {loading ? "Logging in..." : "Log in"}
             </button>
           </form>
           <div className="w-full text-end mt-2">

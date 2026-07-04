@@ -2,7 +2,6 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-;
 import { useRef, useState } from "react";
 import api from "@/lib/axios";
 
@@ -25,7 +24,7 @@ const formatDate = (dateStr: string) =>
   });
 
 const Profile = () => {
-  const { user, organization, logout } = useAuth();
+  const { user, organization, logout, update } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -39,12 +38,11 @@ const Profile = () => {
       const formData = new FormData();
       formData.append("logo", file);
 
-      await api.post("/organization/logo/upload", formData, {
+      await api.post("/organization/logo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Reload to fetch the updated user/org context
-      window.location.reload();
+      await update({ trigger: "update" });
     } catch (err) {
       console.error("Failed to upload logo", err);
       alert("Failed to upload logo. Please try again.");
@@ -81,14 +79,26 @@ const Profile = () => {
 
         {/* User Card */}
         <div className="bg-neutral-950 border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col gap-8 shadow-xl relative">
-          <button 
+          <button
             className="absolute top-6 right-6 md:top-8 md:right-8 text-neutral-400 hover:text-white transition-colors flex gap-2 items-center text-sm border border-neutral-800 rounded-full px-4 py-2 hover:border-neutral-600"
             onClick={() => alert("Edit Profile: Coming Soon!")}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            </svg>
             <span className="hidden sm:inline">Edit Profile</span>
           </button>
-          
+
           {/* User Info */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-neutral-600 to-neutral-900 border border-neutral-700 flex items-center justify-center text-2xl font-semibold text-neutral-200 shrink-0">
@@ -136,12 +146,19 @@ const Profile = () => {
                 </span>
               )}
             </div>
-            
+
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <div
+                className="relative group cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 {org.logoUrl ? (
                   <img
-                    src={org.logoUrl.startsWith("http") ? org.logoUrl : `http://localhost:3000${org.logoUrl}`}
+                    src={
+                      org.logoUrl.startsWith("http")
+                        ? org.logoUrl
+                        : `http://localhost:3000${org.logoUrl}`
+                    }
                     alt={org.name}
                     className="h-16 w-auto rounded-md p-1 object-contain border border-neutral-700 group-hover:opacity-50 transition-opacity"
                   />
@@ -151,22 +168,39 @@ const Profile = () => {
                   </div>
                 )}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
                   </svg>
                 </div>
               </div>
               <div className="flex flex-col gap-1">
                 <h3 className="text-xl font-light text-white">{org.name}</h3>
                 <span className="text-xs text-neutral-500">
-                  {uploading ? "Uploading..." : "Click to upload (JPEG/PNG, Max 2MB)"}
+                  {uploading
+                    ? "Uploading..."
+                    : "Click to upload (JPEG/PNG, Max 2MB)"}
                 </span>
               </div>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
                 accept="image/jpeg,image/png"
                 onChange={handleLogoUpload}
               />
