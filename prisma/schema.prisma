@@ -1,0 +1,210 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AuthAccount {
+  id                String  @id @default(uuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  passwordHash      String?
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Client {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  companyName    String?
+  email          String?
+  address        Json?
+  taxId          String?
+  Organization   Organization @relation(fields: [organizationId], references: [id])
+  Invoice        Invoice[]
+  Project        Project[]
+  Quotation      Quotation[]
+}
+
+model Invoice {
+  id             String        @id @default(uuid())
+  organizationId String
+  clientId       String?
+  number         String
+  status         InvoiceStatus
+  currency       String
+  issueDate      DateTime
+  dueDate        DateTime?
+  subtotal       Decimal
+  taxTotal       Decimal
+  discount       Decimal         @default(0)
+  total          Decimal
+  issuerName     String
+  issuerCompany  String
+  issuerAddress  Json?
+  clientName     String
+  clientCompany  String?
+  clientAddress  Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime
+  Client         Client?       @relation(fields: [clientId], references: [id])
+  Organization   Organization  @relation(fields: [organizationId], references: [id])
+  projectId      String?
+  Project        Project?      @relation(fields: [projectId], references: [id])
+  InvoiceItem    InvoiceItem[]
+
+  @@unique([organizationId, number])
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  total       Decimal
+  Invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Organization {
+  id                 String               @id @default(uuid())
+  name               String
+  logoUrl            String?
+  email              String?
+  phone              String?
+  address            Json?
+  taxId              String?
+  createdAt          DateTime             @default(now())
+  Client             Client[]
+  Invoice            Invoice[]
+  OrganizationMember OrganizationMember[]
+  Project            Project[]
+  Quotation          Quotation[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(uuid())
+  userId         String
+  organizationId String
+  role           String
+  title          String?
+  Organization   Organization @relation(fields: [organizationId], references: [id])
+  User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Quotation {
+  id             String          @id @default(uuid())
+  organizationId String
+  number         String
+  status         QuotationStatus
+  currency       String
+  validUntil     DateTime?
+  subtotal       Decimal
+  taxTotal       Decimal
+  discount       Decimal         @default(0)
+  total          Decimal
+  issuerName     String
+  issuerCompany  String
+  issuerAddress  Json?
+  clientName     String
+  clientCompany  String?
+  clientAddress  Json?
+  createdAt      DateTime        @default(now())
+  clientId       String?
+  Client         Client?         @relation(fields: [clientId], references: [id])
+  Organization   Organization    @relation(fields: [organizationId], references: [id])
+  Project        Project[]
+  QuotationItem  QuotationItem[]
+
+  @@unique([organizationId, number])
+}
+
+model QuotationItem {
+  id          String    @id @default(uuid())
+  quotationId String
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  total       Decimal
+  Quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                 String               @id @default(uuid())
+  email              String               @unique
+  name               String?
+  createdAt          DateTime             @default(now())
+  AuthAccount        AuthAccount[]
+  OrganizationMember OrganizationMember[]
+  RefreshToken       RefreshToken[]
+}
+
+model Project {
+  id             String        @id @default(uuid())
+  organizationId String
+  clientId       String?
+  quotationId    String?
+  name           String
+  description    String?
+  currency       String        @default("USD")
+  status         ProjectStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  Client         Client?       @relation(fields: [clientId], references: [id])
+  Organization   Organization  @relation(fields: [organizationId], references: [id])
+  Quotation      Quotation?    @relation(fields: [quotationId], references: [id])
+  Invoice        Invoice[]
+  ProjectItem    ProjectItem[]
+}
+
+model ProjectItem {
+  id          String  @id @default(uuid())
+  projectId   String
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  total       Decimal
+  Project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
