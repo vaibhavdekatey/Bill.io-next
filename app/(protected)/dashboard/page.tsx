@@ -36,7 +36,7 @@ const quickAccess = [
 ];
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({ clients: 0, invoices: 0, quotations: 0, projects: 0 });
+  const [stats, setStats] = useState<any>({ clients: 0, invoices: 0, quotations: 0, projects: 0, recentClients: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
