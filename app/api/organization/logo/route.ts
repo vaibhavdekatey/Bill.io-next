@@ -62,7 +62,9 @@ export const POST = (req: Request, context: any) =>
     if (org?.logoUrl && org.logoUrl.includes("cloudinary.com")) {
       try {
         const publicId = extractPublicId(org.logoUrl);
-        await cloudinary.uploader.destroy(publicId);
+        if (publicId) {
+          await cloudinary.uploader.destroy(publicId);
+        }
       } catch (e) {
         console.error("Error deleting old logo from Cloudinary:", e);
       }
@@ -138,7 +140,9 @@ export const PUT = (req: Request, context: any) =>
     ) {
       try {
         const publicId = extractPublicId(org.logoUrl);
-        await cloudinary.uploader.destroy(publicId);
+        if (publicId) {
+          await cloudinary.uploader.destroy(publicId);
+        }
       } catch (e) {
         console.error("Error deleting old logo from Cloudinary:", e);
       }
@@ -178,7 +182,9 @@ export const DELETE = (req: Request, context: any) =>
     if (org?.logoUrl && org.logoUrl.includes("cloudinary.com")) {
       try {
         const publicId = extractPublicId(org.logoUrl);
-        await cloudinary.uploader.destroy(publicId);
+        if (publicId) {
+          await cloudinary.uploader.destroy(publicId);
+        }
       } catch (e) {
         console.error("Error deleting logo from Cloudinary:", e);
       }
