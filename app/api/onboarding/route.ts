@@ -8,7 +8,7 @@ export const POST = (req: Request, context: any) =>
   withAuth(async (req, user) => {
     const userId = user.userId;
     const body = await req.json();
-    const { organizationName, accountType, taxId, email, phone, address } = body;
+    const { organizationName, accountType, taxId, email, phone, address, website } = body;
 
     if (!organizationName || organizationName.trim() === "") {
       throw new ApiError(400, "Organization name is required");
@@ -28,9 +28,10 @@ export const POST = (req: Request, context: any) =>
           id: randomUUID(),
           name: organizationName,
           taxId: taxId || null,
-          phone: phone || null,
           email: email || null,
-          address: address,
+          phone: phone || null,
+          website: website || null,
+          address: address || null,
         },
       });
 

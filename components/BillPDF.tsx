@@ -263,6 +263,9 @@ const styles = StyleSheet.create({
     fontSize: 7,
     color: colors.muted,
     textAlign: "center" as any,
+    flexDirection: "column" as any,
+    alignItems: "center" as any,
+    gap: 4,
   },
   statusBadge: {
     fontSize: 8,
@@ -350,9 +353,14 @@ export interface PDFDocumentData {
   issuerName: string;
   issuerCompany: string;
   issuerAddress: any;
+  issuerEmail?: string | null;
+  issuerPhone?: string | null;
+  issuerWebsite?: string | null;
   clientName: string;
   clientCompany: string | null;
   clientAddress: any;
+  clientEmail?: string | null;
+  clientPhone?: string | null;
   items: Array<{
     id: string;
     description: string;
@@ -420,6 +428,12 @@ export default function BillPDF({ data }: { data: PDFDocumentData }) {
             {issuerAddr ? (
               <Text style={styles.infoValueLight}>{issuerAddr}</Text>
             ) : null}
+            {data.issuerEmail && data.issuerEmail !== "Email not set" && (
+              <Text style={styles.infoValueLight}>{data.issuerEmail}</Text>
+            )}
+            {data.issuerPhone && data.issuerPhone !== "Phone not set" && (
+              <Text style={styles.infoValueLight}>{data.issuerPhone}</Text>
+            )}
           </View>
           <View style={styles.infoBlock}>
             <Text style={styles.infoLabel}>Billed To</Text>
@@ -430,6 +444,12 @@ export default function BillPDF({ data }: { data: PDFDocumentData }) {
             {clientAddr ? (
               <Text style={styles.infoValueLight}>{clientAddr}</Text>
             ) : null}
+            {data.clientEmail && data.clientEmail !== "Email not set" && (
+              <Text style={styles.infoValueLight}>{data.clientEmail}</Text>
+            )}
+            {data.clientPhone && data.clientPhone !== "Phone not set" && (
+              <Text style={styles.infoValueLight}>{data.clientPhone}</Text>
+            )}
           </View>
         </View>
 
@@ -547,15 +567,20 @@ export default function BillPDF({ data }: { data: PDFDocumentData }) {
         </View>
 
         {/* ============ FOOTER ============ */}
-        <Text style={styles.footer}>
-          {data.organizationName || data.issuerCompany} • {title} {data.number}{" "}
-          • Generated on{" "}
-          {new Date().toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </Text>
+        <View style={styles.footer}>
+          <Text>
+            {data.organizationName || data.issuerCompany} • {title} {data.number}{" "}
+            • Generated on{" "}
+            {new Date().toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </Text>
+          {data.issuerWebsite && data.issuerWebsite !== "Website not set" && (
+            <Text>{data.issuerWebsite}</Text>
+          )}
+        </View>
       </Page>
     </Document>
   );

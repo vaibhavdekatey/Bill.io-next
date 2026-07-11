@@ -70,6 +70,7 @@ const Onboarding = () => {
   // Step 2
   const [orgEmail, setOrgEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [website, setWebsite] = useState("");
   const [address, setAddress] = useState("");
 
   const handleStep1 = (e: React.FormEvent) => {
@@ -94,6 +95,7 @@ const Onboarding = () => {
         taxId: taxId || undefined,
         email: orgEmail || undefined,
         phone: phone || undefined,
+        website: website || undefined,
         address: address ? { address } : undefined,
       });
       setStep(3);
@@ -140,9 +142,8 @@ const Onboarding = () => {
         {step !== 3 && (
           <div className="flex items-center gap-x-2 mb-10">
             {[1, 2].map((s) => (
-              <React.Fragment>
+              <React.Fragment key={s}>
                 <div
-                  key={s}
                   className={`w-2 h-2 rounded-full transition-all duration-500 ${
                     s <= step ? "bg-white scale-125" : "bg-white/20"
                   }`}
@@ -270,18 +271,30 @@ const Onboarding = () => {
                   />
                 </div>
 
-                <div className="flex flex-col gap-y-2">
-                  <label className="text-sm text-white/60">Phone number</label>
-                  <input
-                    className="bg-neutral-900 border border-neutral-800 focus:border-white/40 outline-none p-4 rounded-lg w-full transition-colors duration-200"
-                    placeholder="+91 98765 43210"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-y-2">
+                    <label className="text-sm text-white/60">Phone number</label>
+                    <input
+                      className="bg-neutral-900 border border-neutral-800 focus:border-white/40 outline-none p-4 rounded-lg w-full transition-colors duration-200"
+                      placeholder="+1 (555) 000-0000"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-y-2">
+                    <label className="text-sm text-white/60">Website (Optional)</label>
+                    <input
+                      className="bg-neutral-900 border border-neutral-800 focus:border-white/40 outline-none p-4 rounded-lg w-full transition-colors duration-200"
+                      placeholder="https://acmecorp.com"
+                      type="url"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-y-2">
+                <div className="flex flex-col gap-y-2 mt-4">
                   <label className="text-sm text-white/60">
                     Business address
                   </label>

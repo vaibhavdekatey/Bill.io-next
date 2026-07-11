@@ -35,9 +35,14 @@ type QuotationDetail = {
   issuerName: string;
   issuerCompany: string;
   issuerAddress: any;
+  issuerEmail?: string | null;
+  issuerPhone?: string | null;
+  issuerWebsite?: string | null;
   clientName: string;
   clientCompany: string | null;
   clientAddress: any;
+  clientEmail?: string | null;
+  clientPhone?: string | null;
   QuotationItem: QuotationItem[];
 };
 
@@ -146,9 +151,14 @@ export default function Quotation() {
         issuerName: quotation.issuerName,
         issuerCompany: quotation.issuerCompany,
         issuerAddress: quotation.issuerAddress,
+        issuerEmail: quotation.issuerEmail,
+        issuerPhone: quotation.issuerPhone,
+        issuerWebsite: quotation.issuerWebsite,
         clientName: quotation.clientName,
         clientCompany: quotation.clientCompany,
         clientAddress: quotation.clientAddress,
+        clientEmail: quotation.clientEmail,
+        clientPhone: quotation.clientPhone,
         items: quotation.QuotationItem,
         logoUrl:
           organization?.Organization?.logoUrl || (organization as any)?.logoUrl,
@@ -389,6 +399,16 @@ export default function Quotation() {
                     {quotation.issuerAddress.address}
                   </span>
                 )}
+                {quotation.issuerEmail && quotation.issuerEmail !== "Email not set" && (
+                  <span className="text-sm text-neutral-400 mt-1 print:text-neutral-700">
+                    {quotation.issuerEmail}
+                  </span>
+                )}
+                {quotation.issuerPhone && quotation.issuerPhone !== "Phone not set" && (
+                  <span className="text-sm text-neutral-400 print:text-neutral-700">
+                    {quotation.issuerPhone}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -409,6 +429,16 @@ export default function Quotation() {
                 {parsedClientAddress && (
                   <span className="text-sm text-neutral-400 mt-1 whitespace-pre-line print:text-neutral-700">
                     {parsedClientAddress}
+                  </span>
+                )}
+                {quotation.clientEmail && quotation.clientEmail !== "Email not set" && (
+                  <span className="text-sm text-neutral-400 mt-1 print:text-neutral-700">
+                    {quotation.clientEmail}
+                  </span>
+                )}
+                {quotation.clientPhone && quotation.clientPhone !== "Phone not set" && (
+                  <span className="text-sm text-neutral-400 print:text-neutral-700">
+                    {quotation.clientPhone}
                   </span>
                 )}
               </div>
@@ -545,6 +575,13 @@ export default function Quotation() {
               </div>
             </div>
           </div>
+
+          {/* Footer details */}
+          {quotation.issuerWebsite && (
+            <div className="flex flex-row justify-center items-center gap-4 border-t border-neutral-800 pt-8 mt-4 text-xs text-neutral-500 print:border-neutral-200 print:text-neutral-500">
+              <span>{quotation.issuerWebsite}</span>
+            </div>
+          )}
         </div>
 
         {/* Delete Modal */}

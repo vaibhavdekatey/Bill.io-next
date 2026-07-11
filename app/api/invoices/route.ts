@@ -229,6 +229,8 @@ export const POST = (req: Request, context: any) =>
     const clientCompany =
       normalize(body.clientCompany) ?? client?.companyName ?? null;
     const clientAddress = body.clientAddress ?? client?.address ?? null;
+    const clientEmail = normalize(body.clientEmail) ?? client?.email ?? null;
+    const clientPhone = normalize(body.clientPhone) ?? client?.phoneNumber ?? null;
 
     if (!clientName) {
       return NextResponse.json(
@@ -244,6 +246,10 @@ export const POST = (req: Request, context: any) =>
     const organization = await prisma.organization.findUnique({
       where: { id: organizationId },
     });
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
     if (!organization) {
       return NextResponse.json(
         { message: "Organization not found", success: false },
@@ -263,13 +269,18 @@ export const POST = (req: Request, context: any) =>
         subtotal,
         taxTotal,
         total,
-        issuerName: organization.name,
+        issuerName: currentUser?.name || organization.name,
         issuerCompany: organization.name,
         issuerAddress: organization.address || "",
+        issuerEmail: organization.email || currentUser?.email || null,
+        issuerPhone: organization.phone || currentUser?.phoneNumber || null,
+        issuerWebsite: organization.website || null,
         clientName,
         discount: discount || 0,
         clientCompany,
         clientAddress,
+        clientEmail,
+        clientPhone,
         updatedAt: new Date(),
         InvoiceItem: {
           create: body.items.map((item: any) => ({

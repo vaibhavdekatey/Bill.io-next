@@ -35,9 +35,14 @@ type InvoiceDetail = {
   issuerName: string;
   issuerCompany: string;
   issuerAddress: any;
+  issuerEmail?: string | null;
+  issuerPhone?: string | null;
+  issuerWebsite?: string | null;
   clientName: string;
   clientCompany: string | null;
   clientAddress: any;
+  clientEmail?: string | null;
+  clientPhone?: string | null;
   InvoiceItem: InvoiceItem[];
 };
 
@@ -145,9 +150,14 @@ export default function Invoice() {
         issuerName: invoice.issuerName,
         issuerCompany: invoice.issuerCompany,
         issuerAddress: invoice.issuerAddress,
+        issuerEmail: invoice.issuerEmail,
+        issuerPhone: invoice.issuerPhone,
+        issuerWebsite: invoice.issuerWebsite,
         clientName: invoice.clientName,
         clientCompany: invoice.clientCompany,
         clientAddress: invoice.clientAddress,
+        clientEmail: invoice.clientEmail,
+        clientPhone: invoice.clientPhone,
         items: invoice.InvoiceItem,
         logoUrl:
           organization?.Organization?.logoUrl || (organization as any)?.logoUrl,
@@ -346,6 +356,16 @@ export default function Invoice() {
                     {parsedIssuerAddress}
                   </span>
                 )}
+                {invoice.issuerEmail && invoice.issuerEmail !== "Email not set" && (
+                  <span className="text-sm text-neutral-400 mt-1 print:text-neutral-700">
+                    {invoice.issuerEmail}
+                  </span>
+                )}
+                {invoice.issuerPhone && invoice.issuerPhone !== "Phone not set" && (
+                  <span className="text-sm text-neutral-400 print:text-neutral-700">
+                    {invoice.issuerPhone}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -366,6 +386,16 @@ export default function Invoice() {
                 {parsedClientAddress && (
                   <span className="text-sm text-neutral-400 mt-1 whitespace-pre-line print:text-neutral-700">
                     {parsedClientAddress}
+                  </span>
+                )}
+                {invoice.clientEmail && invoice.clientEmail !== "Email not set" && (
+                  <span className="text-sm text-neutral-400 mt-1 print:text-neutral-700">
+                    {invoice.clientEmail}
+                  </span>
+                )}
+                {invoice.clientPhone && invoice.clientPhone !== "Phone not set" && (
+                  <span className="text-sm text-neutral-400 print:text-neutral-700">
+                    {invoice.clientPhone}
                   </span>
                 )}
               </div>
@@ -542,6 +572,13 @@ export default function Invoice() {
               </div>
             </div>
           </div>
+
+          {/* Footer details */}
+          {invoice.issuerWebsite && (
+            <div className="flex flex-row justify-center items-center gap-4 border-t border-neutral-800 pt-8 mt-4 text-xs text-neutral-500 print:border-neutral-200 print:text-neutral-500">
+              <span>{invoice.issuerWebsite}</span>
+            </div>
+          )}
         </div>
 
         {/* Delete Modal */}

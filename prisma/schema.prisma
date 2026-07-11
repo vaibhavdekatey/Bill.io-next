@@ -50,9 +50,14 @@ model Invoice {
   issuerName     String
   issuerCompany  String
   issuerAddress  Json?
+  issuerEmail    String?
+  issuerPhone    String?
+  issuerWebsite  String?
   clientName     String
   clientCompany  String?
   clientAddress  Json?
+  clientEmail    String?
+  clientPhone    String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime
   Client         Client?       @relation(fields: [clientId], references: [id])
@@ -82,6 +87,7 @@ model Organization {
   phone              String?
   address            Json?
   taxId              String?
+  website            String?
   createdAt          DateTime             @default(now())
   Client             Client[]
   Invoice            Invoice[]
@@ -116,9 +122,14 @@ model Quotation {
   issuerName     String
   issuerCompany  String
   issuerAddress  Json?
+  issuerEmail    String?
+  issuerPhone    String?
+  issuerWebsite  String?
   clientName     String
   clientCompany  String?
   clientAddress  Json?
+  clientEmail    String?
+  clientPhone    String?
   createdAt      DateTime        @default(now())
   clientId       String?
   Client         Client?         @relation(fields: [clientId], references: [id])

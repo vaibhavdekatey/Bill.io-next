@@ -224,6 +224,7 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8">
               <DetailRow label="Email" value={org.email} />
               <DetailRow label="Phone" value={org.phone} />
+              <DetailRow label="Website" value={(org as any).website} />
               <DetailRow label="Tax ID / GSTIN" value={org.taxId} />
               <DetailRow label="Address" value={parsedAddress} />
             </div>
