@@ -10,6 +10,7 @@ const Register = () => {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confPassword, setConfPassword] = useState("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -28,7 +29,7 @@ const Register = () => {
 
     try {
       setLoading(true);
-      await register(name, email, password);
+      await register(name, email, password, phoneNumber.trim() || undefined);
       router.push(onBoardingComplete ? "/dashboard" : "/onboarding");
     } catch (error: any) {
       setError(error.response?.data?.message || "Registration Failed");
@@ -90,6 +91,12 @@ const Register = () => {
               placeholder="Your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              className="bg-neutral-800 p-4 rounded-lg"
+              placeholder="Your phone number (optional)"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
             />
             <div className="relative w-full">
               <input

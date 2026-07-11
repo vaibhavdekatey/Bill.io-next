@@ -94,6 +94,7 @@ export const resolveClient = async (organizationId: string, body: any) => {
   const clientName = normalize(body.clientName);
   const companyName = normalize(body.clientCompany);
   const email = normalize(body.clientEmail);
+  const phoneNumber = normalize(body.clientPhone);
   const taxId = normalize(body.clientTaxId);
 
   if (!clientName) {
@@ -140,6 +141,7 @@ export const resolveClient = async (organizationId: string, body: any) => {
       name: clientName,
       companyName,
       email,
+      phoneNumber,
       taxId,
       address: body.clientAddress ?? null,
     },

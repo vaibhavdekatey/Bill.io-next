@@ -11,6 +11,7 @@ type Client = {
   name: string;
   companyName: string | null;
   email: string | null;
+  phoneNumber: string | null;
   taxId: string | null;
   address: any;
   Project?: any[];
@@ -22,6 +23,7 @@ type ClientFormState = {
   name: string;
   companyName: string;
   email: string;
+  phoneNumber: string;
   taxId: string;
   address: {
     line1: string;
@@ -57,6 +59,7 @@ export default function Clients() {
     name: "",
     companyName: "",
     email: "",
+    phoneNumber: "",
     taxId: "",
     address: {
       line1: "",
@@ -92,6 +95,7 @@ export default function Clients() {
       name: "",
       companyName: "",
       email: "",
+      phoneNumber: "",
       taxId: "",
       address: {
         line1: "",
@@ -118,6 +122,7 @@ export default function Clients() {
       name: client.name,
       companyName: client.companyName || "",
       email: client.email || "",
+      phoneNumber: client.phoneNumber || "",
       taxId: client.taxId || "",
       address: {
         line1:
@@ -169,6 +174,7 @@ export default function Clients() {
         name: form.name.trim(),
         companyName: form.companyName.trim() || undefined,
         email: form.email.trim() || undefined,
+        phoneNumber: form.phoneNumber.trim() || undefined,
         taxId: form.taxId.trim() || undefined,
         address: form.address,
       };
@@ -394,6 +400,20 @@ export default function Clients() {
                         setForm({ ...form, email: e.target.value })
                       }
                       placeholder="e.g. priyesh@acme.com"
+                      className="bg-neutral-900 border border-neutral-800 text-white focus:outline-none focus:border-neutral-600 rounded-xl px-4 py-3 text-sm transition-colors"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs uppercase tracking-wider text-neutral-400 font-medium">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={form.phoneNumber}
+                      onChange={(e) =>
+                        setForm({ ...form, phoneNumber: e.target.value })
+                      }
+                      placeholder="e.g. +1 234 567 8900"
                       className="bg-neutral-900 border border-neutral-800 text-white focus:outline-none focus:border-neutral-600 rounded-xl px-4 py-3 text-sm transition-colors"
                     />
                   </div>

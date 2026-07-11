@@ -127,6 +127,7 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8">
               <DetailRow label="Full Name" value={user?.name} />
               <DetailRow label="Email" value={user?.email} />
+              <DetailRow label="Phone Number" value={(user as any)?.phoneNumber} />
               <DetailRow label="Role" value={organization?.role} />
               <DetailRow label="Title" value={organization?.title} />
             </div>

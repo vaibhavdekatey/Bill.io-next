@@ -8,6 +8,7 @@ interface User {
   id: string;
   email: string;
   name: string | null;
+  phoneNumber: string | null;
   orgId: string | null;
 }
 
@@ -35,7 +36,7 @@ interface AuthContextType {
   user: User | null;
   accessToken: string | null; // Kept for interface compatibility, but unused
   login: (email: string, password: string) => Promise<{ onBoardingComplete: boolean }>;
-  register: (name: string, email: string, password: string) => Promise<{ onBoardingComplete: boolean }>;
+  register: (name: string, email: string, password: string, phoneNumber?: string) => Promise<{ onBoardingComplete: boolean }>;
   googleLogin: (idToken: string) => Promise<{ onBoardingComplete: boolean }>;
   logout: () => Promise<void>;
   loading: boolean;
@@ -83,11 +84,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { onBoardingComplete: isOnboarded };
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, phoneNumber?: string) => {
     const res = await api.post("/auth/register", {
       name,
       email,
       password,
+      phoneNumber,
     });
     
     if (res.data.error) {

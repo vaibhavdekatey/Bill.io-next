@@ -19,6 +19,7 @@ type ClientForm = {
   name: string;
   companyName: string;
   email: string;
+  phoneNumber: string;
   taxId: string;
   address: {
     line1: string;
@@ -35,6 +36,7 @@ type ClientOption = {
   name: string;
   companyName?: string | null;
   email?: string | null;
+  phoneNumber?: string | null;
   taxId?: string | null;
   address: {
     line1: string;
@@ -98,6 +100,7 @@ export default function NewQuotation() {
             name: c.name,
             companyName: c.companyName,
             email: c.email,
+            phoneNumber: (c as any).phoneNumber,
             taxId: c.taxId,
             address: parsedAddress,
           };
@@ -121,6 +124,7 @@ export default function NewQuotation() {
     name: "",
     companyName: "",
     email: "",
+    phoneNumber: "",
     taxId: "",
     address: {
       line1: "",
@@ -224,6 +228,7 @@ export default function NewQuotation() {
             name: quo.clientName || "",
             companyName: quo.clientCompany || "",
             email: "",
+            phoneNumber: "",
             taxId: "",
             address:
               typeof addr === "object" && addr !== null
@@ -277,6 +282,9 @@ export default function NewQuotation() {
         clientEmail: clientId
           ? selectedClient?.email || undefined
           : client.email.trim() || undefined,
+        clientPhone: clientId
+          ? selectedClient?.phoneNumber || undefined
+          : client.phoneNumber.trim() || undefined,
         clientTaxId: clientId
           ? selectedClient?.taxId || undefined
           : client.taxId.trim() || undefined,
@@ -452,7 +460,7 @@ export default function NewQuotation() {
                       </Field>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Field label="Client email">
                         <Input
                           type="email"
@@ -464,6 +472,19 @@ export default function NewQuotation() {
                             }))
                           }
                           placeholder="client@company.com"
+                        />
+                      </Field>
+                      <Field label="Phone number">
+                        <Input
+                          type="tel"
+                          value={client.phoneNumber}
+                          onChange={(e) =>
+                            setClient((prev) => ({
+                              ...prev,
+                              phoneNumber: e.target.value,
+                            }))
+                          }
+                          placeholder="+1 234 567 8900"
                         />
                       </Field>
                       <Field label="GST / Tax ID">
@@ -576,13 +597,16 @@ export default function NewQuotation() {
                   </>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Field label="Client email">
                         <Input
                           type="email"
                           value={selectedClient?.email || ""}
                           disabled
                         />
+                      </Field>
+                      <Field label="Phone number">
+                        <Input value={selectedClient?.phoneNumber || ""} disabled />
                       </Field>
                       <Field label="GST / Tax ID">
                         <Input value={selectedClient?.taxId || ""} disabled />

@@ -25,6 +25,7 @@ model Client {
   name           String
   companyName    String?
   email          String?
+  phoneNumber    String?
   address        Json?
   taxId          String?
   Organization   Organization @relation(fields: [organizationId], references: [id])
@@ -153,6 +154,7 @@ model User {
   id                 String               @id @default(uuid())
   email              String               @unique
   name               String?
+  phoneNumber        String?
   createdAt          DateTime             @default(now())
   AuthAccount        AuthAccount[]
   OrganizationMember OrganizationMember[]

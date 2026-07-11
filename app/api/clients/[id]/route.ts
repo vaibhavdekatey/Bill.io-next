@@ -55,6 +55,7 @@ export const PUT = (req: Request, context: any) => withAuth(async (req, user, co
   const name = normalize(body.name);
   const companyName = normalize(body.companyName);
   const email = normalize(body.email);
+  const phoneNumber = normalize(body.phoneNumber);
   const taxId = normalize(body.taxId);
   const address = body.address;
   
@@ -68,6 +69,7 @@ export const PUT = (req: Request, context: any) => withAuth(async (req, user, co
       name,
       companyName,
       email,
+      phoneNumber,
       taxId,
       address: address
         ? typeof address === "string"

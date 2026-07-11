@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
   try {
-    const { email, name, password } = await req.json();
+    const { email, name, password, phoneNumber } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
         id: randomUUID(),
         email,
         name,
+        phoneNumber,
         AuthAccount: {
           create: {
             id: randomUUID(),
