@@ -157,6 +157,8 @@ export const PUT = (req: Request, context: any) =>
           clientName,
           clientCompany,
           clientAddress,
+          notes: body.notes !== undefined ? body.notes || null : invoice.notes,
+          terms: body.terms !== undefined ? body.terms || null : invoice.terms,
           discount,
           updatedAt: new Date(),
           ...(body.items

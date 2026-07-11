@@ -58,6 +58,8 @@ model Invoice {
   clientAddress  Json?
   clientEmail    String?
   clientPhone    String?
+  notes          String?
+  terms          String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime
   Client         Client?       @relation(fields: [clientId], references: [id])
@@ -130,6 +132,8 @@ model Quotation {
   clientAddress  Json?
   clientEmail    String?
   clientPhone    String?
+  notes          String?
+  terms          String?
   createdAt      DateTime        @default(now())
   clientId       String?
   Client         Client?         @relation(fields: [clientId], references: [id])

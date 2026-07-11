@@ -240,6 +240,8 @@ export const POST = (req: Request, context: any) =>
         clientAddress,
         clientEmail,
         clientPhone,
+        notes: body.notes || null,
+        terms: body.terms || null,
         QuotationItem: {
           create: body.items.map((item: any) => ({
             description: item.description.trim(),

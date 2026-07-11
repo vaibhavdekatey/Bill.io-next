@@ -43,6 +43,8 @@ type QuotationDetail = {
   clientAddress: any;
   clientEmail?: string | null;
   clientPhone?: string | null;
+  notes?: string | null;
+  terms?: string | null;
   QuotationItem: QuotationItem[];
 };
 
@@ -159,6 +161,8 @@ export default function Quotation() {
         clientAddress: quotation.clientAddress,
         clientEmail: quotation.clientEmail,
         clientPhone: quotation.clientPhone,
+        notes: quotation.notes,
+        terms: quotation.terms,
         items: quotation.QuotationItem,
         logoUrl:
           organization?.Organization?.logoUrl || (organization as any)?.logoUrl,
@@ -523,9 +527,32 @@ export default function Quotation() {
             </div>
           </div>
 
-          {/* Calculations Summary */}
-          <div className="flex flex-col items-end gap-3 border-t border-neutral-800 pt-8 print:border-neutral-200">
-            <div className="w-80 flex flex-col gap-3">
+          {/* Calculations Summary and Notes */}
+          <div className="flex flex-col md:flex-row justify-between gap-8 border-t border-neutral-800 pt-8 print:border-neutral-200 print:flex-row">
+            <div className="flex-1 flex flex-col gap-6">
+              {quotation.notes && (
+                <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                  <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                    Client Note
+                  </span>
+                  <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
+                    {quotation.notes}
+                  </span>
+                </div>
+              )}
+              {quotation.terms && (
+                <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                  <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                    Terms & Conditions
+                  </span>
+                  <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
+                    {quotation.terms}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full md:w-80 flex flex-col gap-3 print:w-80">
               <div className="flex justify-between text-sm">
                 <span className="text-neutral-400 print:text-neutral-600">
                   Subtotal

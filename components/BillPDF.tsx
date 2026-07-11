@@ -361,6 +361,8 @@ export interface PDFDocumentData {
   clientAddress: any;
   clientEmail?: string | null;
   clientPhone?: string | null;
+  notes?: string | null;
+  terms?: string | null;
   items: Array<{
     id: string;
     description: string;
@@ -525,8 +527,33 @@ export default function BillPDF({ data }: { data: PDFDocumentData }) {
           ))}
         </View>
 
-        {/* ============ SUMMARY ============ */}
-        <View style={styles.summaryContainer}>
+        {/* ============ SUMMARY AND NOTES ============ */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
+          {/* Notes and Terms */}
+          <View style={{ flex: 1, paddingRight: 20 }}>
+            {data.notes && (
+              <View style={{ marginBottom: 10, padding: 10, backgroundColor: "#F9FAFB", borderRadius: 6, borderWidth: 1, borderColor: "#E5E7EB" }}>
+                <Text style={{ fontSize: 9, color: colors.secondary, marginBottom: 4, textTransform: "uppercase" as any }}>
+                  Client Note
+                </Text>
+                <Text style={{ fontSize: 9, color: colors.primary }}>
+                  {data.notes}
+                </Text>
+              </View>
+            )}
+            {data.terms && (
+              <View style={{ padding: 10, backgroundColor: "#F9FAFB", borderRadius: 6, borderWidth: 1, borderColor: "#E5E7EB" }}>
+                <Text style={{ fontSize: 9, color: colors.secondary, marginBottom: 4, textTransform: "uppercase" as any }}>
+                  Terms & Conditions
+                </Text>
+                <Text style={{ fontSize: 9, color: colors.primary }}>
+                  {data.terms}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Calculations Summary */}
           <View style={styles.summaryBlock}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal</Text>

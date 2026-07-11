@@ -43,6 +43,8 @@ type InvoiceDetail = {
   clientAddress: any;
   clientEmail?: string | null;
   clientPhone?: string | null;
+  notes?: string | null;
+  terms?: string | null;
   InvoiceItem: InvoiceItem[];
 };
 
@@ -158,6 +160,8 @@ export default function Invoice() {
         clientAddress: invoice.clientAddress,
         clientEmail: invoice.clientEmail,
         clientPhone: invoice.clientPhone,
+        notes: invoice.notes,
+        terms: invoice.terms,
         items: invoice.InvoiceItem,
         logoUrl:
           organization?.Organization?.logoUrl || (organization as any)?.logoUrl,
@@ -527,9 +531,32 @@ export default function Invoice() {
             </div>
           </div>
 
-          {/* Calculations Summary */}
-          <div className="flex flex-col items-end gap-3 border-t border-neutral-800 pt-8 print:border-neutral-200">
-            <div className="w-80 flex flex-col gap-3">
+          {/* Calculations Summary and Notes */}
+          <div className="flex flex-col md:flex-row justify-between gap-8 border-t border-neutral-800 pt-8 print:border-neutral-200 print:flex-row">
+            <div className="flex-1 flex flex-col gap-6">
+              {invoice.notes && (
+                <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                  <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                    Client Note
+                  </span>
+                  <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
+                    {invoice.notes}
+                  </span>
+                </div>
+              )}
+              {invoice.terms && (
+                <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                  <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                    Payment Terms
+                  </span>
+                  <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
+                    {invoice.terms}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full md:w-80 flex flex-col gap-3 print:w-80">
               <div className="flex justify-between text-sm">
                 <span className="text-neutral-400 print:text-neutral-600">
                   Subtotal

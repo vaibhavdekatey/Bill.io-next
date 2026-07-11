@@ -281,6 +281,8 @@ export const POST = (req: Request, context: any) =>
         clientAddress,
         clientEmail,
         clientPhone,
+        notes: body.notes || null,
+        terms: body.terms || null,
         updatedAt: new Date(),
         InvoiceItem: {
           create: body.items.map((item: any) => ({
