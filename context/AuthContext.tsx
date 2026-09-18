@@ -74,9 +74,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [session, status]);
 
   const login = async (email: string, password: string) => {
-    const res = await signIn("credentials", { email, password, redirect: false });
+    const res = await signIn("credentials", {
+      email: email.trim(),
+      password,
+      redirect: false,
+    });
     if (res?.error) {
-      throw { response: { data: { message: "Invalid credentials" } } };
+      console.error("NextAuth signIn error:", res.error);
+      const message =
+        res.error === "CredentialsSignin"
+          ? "Invalid email or password"
+          : `Login failed: ${res.error}`;
+      throw { response: { data: { message } } };
     }
     const currentSession = await getSession();
     const isOnboarded = (currentSession?.user as any)?.onBoardingComplete || false;

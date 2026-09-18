@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "f0003b860ab854fc98ef657bc08034db",
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -20,15 +22,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const account = await prisma.authAccount.findUnique({
+        const input = (credentials.email as string).trim();
+
+        // 1. Try exact match on providerAccountId
+        let account = await prisma.authAccount.findUnique({
           where: {
             provider_providerAccountId: {
               provider: "credentials",
-              providerAccountId: credentials.email as string,
+              providerAccountId: input,
             },
           },
           include: { User: true },
         });
+
+        // 2. If not found, try case-insensitive lookup on providerAccountId or User email
+        if (!account) {
+          account = await prisma.authAccount.findFirst({
+            where: {
+              provider: "credentials",
+              OR: [
+                { providerAccountId: { equals: input, mode: "insensitive" } },
+                { User: { email: { equals: input, mode: "insensitive" } } },
+              ],
+            },
+            include: { User: true },
+          });
+        }
 
         if (!account || !account.passwordHash) return null;
 
