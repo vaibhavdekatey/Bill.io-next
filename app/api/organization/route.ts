@@ -40,6 +40,13 @@ export const PATCH = (req: Request, context: any) =>
     const website = normalize(body.website);
     const taxId = normalize(body.taxId);
 
+    const defaultCurrency = normalize(body.defaultCurrency);
+    const defaultPaymentTerms = normalize(body.defaultPaymentTerms);
+    const defaultNotes = typeof body.defaultNotes === "string" ? body.defaultNotes : undefined;
+    const defaultTerms = typeof body.defaultTerms === "string" ? body.defaultTerms : undefined;
+    const invoicePrefix = normalize(body.invoicePrefix);
+    const quotationPrefix = normalize(body.quotationPrefix);
+
     const data: Record<string, any> = {};
     if (name !== undefined) {
       if (!name) {
@@ -54,6 +61,18 @@ export const PATCH = (req: Request, context: any) =>
     if (phone !== undefined) data.phone = phone;
     if (website !== undefined) data.website = website;
     if (taxId !== undefined) data.taxId = taxId;
+
+    if (defaultCurrency !== undefined) data.defaultCurrency = defaultCurrency;
+    if (body.defaultTaxRate !== undefined) data.defaultTaxRate = Number(body.defaultTaxRate) || 0;
+    if (defaultPaymentTerms !== undefined) data.defaultPaymentTerms = defaultPaymentTerms;
+    if (defaultNotes !== undefined) data.defaultNotes = defaultNotes;
+    if (defaultTerms !== undefined) data.defaultTerms = defaultTerms;
+    if (invoicePrefix !== undefined) data.invoicePrefix = invoicePrefix;
+    if (quotationPrefix !== undefined) data.quotationPrefix = quotationPrefix;
+
+    if (body.bankDetails !== undefined) {
+      data.bankDetails = body.bankDetails;
+    }
 
     // Address: accept structured object
     if (body.address !== undefined) {

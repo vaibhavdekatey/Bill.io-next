@@ -82,20 +82,29 @@ model InvoiceItem {
 }
 
 model Organization {
-  id                 String               @id @default(uuid())
-  name               String
-  logoUrl            String?
-  email              String?
-  phone              String?
-  address            Json?
-  taxId              String?
-  website            String?
-  createdAt          DateTime             @default(now())
-  Client             Client[]
-  Invoice            Invoice[]
-  OrganizationMember OrganizationMember[]
-  Project            Project[]
-  Quotation          Quotation[]
+  id                  String               @id @default(uuid())
+  name                String
+  logoUrl             String?
+  email               String?
+  phone               String?
+  address             Json?
+  taxId               String?
+  website             String?
+  defaultCurrency     String               @default("INR")
+  defaultTaxRate      Decimal              @default(0)
+  defaultPaymentTerms String               @default("Net 30")
+  defaultNotes        String?
+  defaultTerms        String?
+  bankDetails         Json?
+  invoicePrefix       String               @default("INV")
+  quotationPrefix     String               @default("QUO")
+  createdAt           DateTime             @default(now())
+  Client              Client[]
+  Invoice             Invoice[]
+  OrganizationMember  OrganizationMember[]
+  OrganizationInvite  OrganizationInvite[]
+  Project             Project[]
+  Quotation           Quotation[]
 }
 
 model OrganizationMember {
@@ -108,6 +117,20 @@ model OrganizationMember {
   User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, organizationId])
+}
+
+model OrganizationInvite {
+  id             String       @id @default(uuid())
+  organizationId String
+  email          String
+  role           String       @default("MEMBER")
+  title          String?
+  token          String       @unique
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, email])
 }
 
 model Quotation {
