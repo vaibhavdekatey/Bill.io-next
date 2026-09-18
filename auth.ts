@@ -92,6 +92,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const dbUser = await prisma.user.findUnique({ where: { email: token.email! } });
         if (dbUser) {
           token.id = dbUser.id;
+          if (dbUser.name) token.name = dbUser.name;
+          // @ts-ignore
+          token.phoneNumber = dbUser.phoneNumber;
         }
 
         const orgMember = await prisma.organizationMember.findFirst({
@@ -106,10 +109,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (trigger === "update" && token.id) {
-        const orgMember = await prisma.organizationMember.findFirst({
-          where: { userId: token.id as string },
-          include: { Organization: true },
-        });
+        const [dbUser, orgMember] = await Promise.all([
+          prisma.user.findUnique({ where: { id: token.id as string } }),
+          prisma.organizationMember.findFirst({
+            where: { userId: token.id as string },
+            include: { Organization: true },
+          }),
+        ]);
+        if (dbUser) {
+          if (dbUser.name) token.name = dbUser.name;
+          // @ts-ignore
+          token.phoneNumber = dbUser.phoneNumber;
+        }
         if (orgMember) {
           token.orgId = orgMember.organizationId;
           token.orgTitle = orgMember.title;
@@ -140,6 +151,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
+        if (token.name) session.user.name = token.name as string;
+        // @ts-ignore
+        session.user.phoneNumber = token.phoneNumber as string;
         // @ts-ignore
         session.user.orgId = token.orgId as string;
         // @ts-ignore

@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           onClick={onClose}
         />
       )}
-      <aside className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 w-[300px] flex flex-col py-4 px-6 h-screen border-r border-r-neutral-700/40 bg-neutral-950 justify-between ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:left-0 lg:translate-x-0 w-[300px] shrink-0 flex flex-col py-4 px-6 h-screen border-r border-r-neutral-700/40 bg-neutral-950 justify-between overflow-y-auto ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
       <div className="flex flex-col justify-start">
         <div className="w-18 h-fit  pb-6 pt-2">
           <img
