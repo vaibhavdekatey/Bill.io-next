@@ -80,12 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       redirect: false,
     });
     if (res?.error) {
-      console.error("NextAuth signIn error:", res.error);
-      const message =
-        res.error === "CredentialsSignin"
-          ? "Invalid email or password"
-          : `Login failed: ${res.error}`;
-      throw { response: { data: { message } } };
+      throw { response: { data: { message: "Invalid credentials" } } };
     }
     const currentSession = await getSession();
     const isOnboarded = (currentSession?.user as any)?.onBoardingComplete || false;

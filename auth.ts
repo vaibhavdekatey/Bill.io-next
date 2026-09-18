@@ -6,8 +6,6 @@ import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: true,
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "f0003b860ab854fc98ef657bc08034db",
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -35,7 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           include: { User: true },
         });
 
-        // 2. If not found, try case-insensitive lookup on providerAccountId or User email
+        // 2. Fallback to case-insensitive lookup on providerAccountId or User email
         if (!account) {
           account = await prisma.authAccount.findFirst({
             where: {
@@ -106,8 +104,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
-        
-        // Ensure we have DB id for Google logins, where user.id might be Google's sub
+
         const dbUser = await prisma.user.findUnique({ where: { email: token.email! } });
         if (dbUser) {
           token.id = dbUser.id;
@@ -150,7 +147,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // If token says onboarding is not complete, double check the DB
-      // just in case they completed it in another tab or the session wasn't updated
       if (!token.onBoardingComplete && token.id) {
         const orgMember = await prisma.organizationMember.findFirst({
           where: { userId: token.id as string },
@@ -187,21 +183,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  session: { 
+  session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === "production"
-        ? "__Secure-authjs.session-token"
-        : "authjs.session-token",
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-authjs.session-token"
+          : "authjs.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60, // 30 days — makes it a persistent cookie
+        maxAge: 30 * 24 * 60 * 60, // 30 days
       },
     },
   },
