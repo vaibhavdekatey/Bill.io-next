@@ -120,7 +120,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.orgId = orgMember?.organizationId;
         token.orgTitle = orgMember?.title;
         token.orgRole = orgMember?.role;
-        token.organization = orgMember;
+        token.organization = orgMember ? JSON.parse(JSON.stringify(orgMember)) : orgMember;
         token.onBoardingComplete = !!orgMember;
       }
 
@@ -141,7 +141,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.orgId = orgMember.organizationId;
           token.orgTitle = orgMember.title;
           token.orgRole = orgMember.role;
-          token.organization = orgMember;
+          token.organization = orgMember ? JSON.parse(JSON.stringify(orgMember)) : orgMember;
           token.onBoardingComplete = true;
         }
       }
@@ -156,7 +156,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.orgId = orgMember.organizationId;
           token.orgTitle = orgMember.title;
           token.orgRole = orgMember.role;
-          token.organization = orgMember;
+          token.organization = orgMember ? JSON.parse(JSON.stringify(orgMember)) : orgMember;
           token.onBoardingComplete = true;
         }
       }
