@@ -3,7 +3,11 @@ import { auth } from "@/auth";
 import { ApiError } from "./utils/ApiError";
 
 export function withAuth(
-  handler: (req: Request, user: { userId: string }, context?: any) => Promise<NextResponse>
+  handler: (
+    req: Request,
+    user: { userId: string; id: string; orgId?: string },
+    context?: any
+  ) => Promise<NextResponse>
 ) {
   return async (req: Request, context: any) => {
     try {
@@ -11,7 +15,12 @@ export function withAuth(
       if (!session?.user?.id) {
         return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
       }
-      return await handler(req, { userId: session.user.id }, context);
+      const user = {
+        userId: session.user.id,
+        id: session.user.id,
+        orgId: (session.user as any).orgId as string | undefined,
+      };
+      return await handler(req, user, context);
     } catch (error: any) {
       console.error(error);
       if (error instanceof ApiError) {

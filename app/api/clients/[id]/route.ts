@@ -8,7 +8,7 @@ export const GET = (req: Request, context: any) => withAuth(async (req, user, co
   if (!id) {
     return NextResponse.json({ message: "Client ID is required" }, { status: 400 });
   }
-  const organizationId = await getOrganizationIdForUser(user.userId);
+  const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
   if (!organizationId) {
     return NextResponse.json({ message: "Organization not found for user" }, { status: 404 });
   }
@@ -37,7 +37,7 @@ export const PUT = (req: Request, context: any) => withAuth(async (req, user, co
   if (!id) {
     return NextResponse.json({ message: "Client ID is required" }, { status: 400 });
   }
-  const organizationId = await getOrganizationIdForUser(user.userId);
+  const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
   if (!organizationId) {
     return NextResponse.json({ message: "Organization not found for user" }, { status: 404 });
   }
@@ -87,7 +87,7 @@ export const DELETE = (req: Request, context: any) => withAuth(async (req, user,
   if (!id) {
     return NextResponse.json({ message: "Client ID is required" }, { status: 400 });
   }
-  const organizationId = await getOrganizationIdForUser(user.userId);
+  const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
   if (!organizationId) {
     return NextResponse.json({ message: "Organization not found for user" }, { status: 404 });
   }

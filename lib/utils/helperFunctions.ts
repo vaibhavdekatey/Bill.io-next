@@ -58,7 +58,9 @@ export const generateNextNumber = async (
   return `QUO-${String(lastNumber + 1).padStart(3, "0")}`;
 };
 
-export const getOrganizationIdForUser = async (userId: string) => {
+export const getOrganizationIdForUser = async (userId: string, cachedOrgId?: string) => {
+  if (cachedOrgId) return cachedOrgId;
+
   const membership = await prisma.organizationMember.findFirst({
     where: { userId },
     select: { organizationId: true },

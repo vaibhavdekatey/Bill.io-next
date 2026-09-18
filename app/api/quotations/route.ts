@@ -21,7 +21,7 @@ export const GET = (req: Request, context: any) =>
       );
     }
 
-    const organizationId = await getOrganizationIdForUser(userId);
+    const organizationId = user?.orgId || await getOrganizationIdForUser(userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organizatiion not found for the user", success: false },
@@ -173,7 +173,7 @@ export const POST = (req: Request, context: any) =>
       );
     }
 
-    const organizationId = await getOrganizationIdForUser(userId);
+    const organizationId = user?.orgId || await getOrganizationIdForUser(userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organizatiion not found for the user", success: false },

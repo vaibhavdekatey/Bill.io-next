@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getOrganizationIdForUser } from "@/lib/utils/helperFunctions";
 
 export const POST = (req: Request, context: any) => withAuth(async (req, user, context) => {
-  const organizationId = await getOrganizationIdForUser(user.userId);
+  const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
   if (!organizationId) {
     return NextResponse.json({ message: "Organization not found" }, { status: 401 });
   }

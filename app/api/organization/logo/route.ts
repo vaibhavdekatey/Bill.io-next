@@ -36,7 +36,7 @@ const extractPublicId = (url: string) => {
 
 export const POST = (req: Request, context: any) =>
   withAuth(async (req, user, context) => {
-    const organizationId = await getOrganizationIdForUser(user.userId);
+    const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organization not found for user" },
@@ -111,7 +111,7 @@ export const POST = (req: Request, context: any) =>
 
 export const PUT = (req: Request, context: any) =>
   withAuth(async (req, user, context) => {
-    const organizationId = await getOrganizationIdForUser(user.userId);
+    const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organization not found for user" },
@@ -166,7 +166,7 @@ export const PUT = (req: Request, context: any) =>
 
 export const DELETE = (req: Request, context: any) =>
   withAuth(async (req, user, context) => {
-    const organizationId = await getOrganizationIdForUser(user.userId);
+    const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organization not found for user" },

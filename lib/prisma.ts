@@ -1,9 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { PrismaNeon } from '@prisma/adapter-neon';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
-import ws from 'ws';
-
-neonConfig.webSocketConstructor = ws;
 
 const prismaClientSingleton = () => {
   // Strip quotes if they were accidentally copied into Vercel
@@ -19,7 +16,7 @@ const prismaClientSingleton = () => {
   }
 
   const pool = new Pool({ connectionString: url });
-  const adapter = new PrismaNeon(pool);
+  const adapter = new PrismaPg(pool as any);
   return new PrismaClient({ adapter });
 };
 

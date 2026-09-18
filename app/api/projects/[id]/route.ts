@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getOrganizationIdForUser } from "@/lib/utils/helperFunctions";
 
 export const GET = (req: Request, context: any) => withAuth(async (req, user, context) => {
-  const organizationId = await getOrganizationIdForUser(user.userId);
+  const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
   const id = (await context.params).id;
 
   const project = await prisma.project.findFirst({
@@ -25,7 +25,7 @@ export const GET = (req: Request, context: any) => withAuth(async (req, user, co
 })(req, context);
 
 export const DELETE = (req: Request, context: any) => withAuth(async (req, user, context) => {
-  const organizationId = await getOrganizationIdForUser(user.userId);
+  const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
   const id = (await context.params).id;
 
   const project = await prisma.project.findFirst({

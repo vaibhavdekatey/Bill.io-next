@@ -26,7 +26,7 @@ export const GET = (req: Request, context: any) =>
       );
     }
 
-    const organizationId = await getOrganizationIdForUser(userId);
+    const organizationId = user?.orgId || await getOrganizationIdForUser(userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organizatiion not found for the user", success: false },
@@ -78,7 +78,7 @@ export const PUT = (req: Request, context: any) =>
       );
     }
 
-    const organizationId = await getOrganizationIdForUser(userId);
+    const organizationId = user?.orgId || await getOrganizationIdForUser(userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organization not found for user", success: false },
@@ -205,7 +205,7 @@ export const PATCH = (req: Request, context: any) =>
       );
     }
 
-    const organizationId = await getOrganizationIdForUser(userId);
+    const organizationId = user?.orgId || await getOrganizationIdForUser(userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organization not found for user", success: false },
@@ -258,7 +258,7 @@ export const DELETE = (req: Request, context: any) =>
       );
     }
 
-    const organizationId = await getOrganizationIdForUser(userId);
+    const organizationId = user?.orgId || await getOrganizationIdForUser(userId);
     if (!organizationId) {
       return NextResponse.json(
         { message: "Organization not found for user", success: false },
