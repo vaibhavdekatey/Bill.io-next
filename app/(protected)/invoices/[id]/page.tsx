@@ -137,6 +137,7 @@ export default function Invoice() {
     return formatAddress(invoice?.clientAddress); // or quotation?.clientAddress
   }, [invoice?.clientAddress]);
 
+
   const pdfData: PDFDocumentData | null = invoice
     ? {
         type: "INVOICE",
@@ -242,14 +243,7 @@ export default function Invoice() {
     new Date(invoice.dueDate) < new Date();
   const displayStatus = isOverdue ? "OVERDUE" : invoice.status;
 
-  const parsedIssuerAddress =
-    typeof invoice.issuerAddress === "string"
-      ? invoice.issuerAddress
-      : typeof invoice.issuerAddress === "object" &&
-          invoice.issuerAddress !== null
-        ? (invoice.issuerAddress as any).address ||
-          JSON.stringify(invoice.issuerAddress)
-        : "";
+  const parsedIssuerAddress = formatAddress(invoice.issuerAddress);
 
   return (
     <main className="w-full overflow-y-auto py-8 px-4 md:px-12">
@@ -355,7 +349,7 @@ export default function Invoice() {
                       {invoice.issuerName}
                     </span>
                   )}
-                {parsedIssuerAddress && (
+                {parsedIssuerAddress && parsedIssuerAddress !== "-" && (
                   <span className="text-sm text-neutral-400 mt-1 whitespace-pre-line print:text-neutral-700">
                     {parsedIssuerAddress}
                   </span>

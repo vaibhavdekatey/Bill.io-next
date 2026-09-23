@@ -138,6 +138,10 @@ export default function Quotation() {
     return formatAddress(quotation?.clientAddress); // or quotation?.clientAddress
   }, [quotation?.clientAddress]);
 
+  const parsedIssuerAddress = useMemo(() => {
+    return formatAddress(quotation?.issuerAddress);
+  }, [quotation?.issuerAddress]);
+
   const pdfData: PDFDocumentData | null = quotation
     ? {
         type: "QUOTATION",
@@ -398,9 +402,9 @@ export default function Quotation() {
                       {quotation.issuerName}
                     </span>
                   )}
-                {quotation.issuerAddress.address.length > 0 && (
+                {parsedIssuerAddress && parsedIssuerAddress !== "-" && (
                   <span className="text-sm text-neutral-400 mt-1 whitespace-pre-line print:text-neutral-700">
-                    {quotation.issuerAddress.address}
+                    {parsedIssuerAddress}
                   </span>
                 )}
                 {quotation.issuerEmail && quotation.issuerEmail !== "Email not set" && (
