@@ -628,18 +628,35 @@ export default function BillPDF({ data }: { data: PDFDocumentData }) {
             </View>
 
             {Number(data.discount) > 0 && (
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>
-                  Discount ({Number(data.discount)}%
-                  {data.discountRemark ? ` - ${data.discountRemark}` : ""})
-                </Text>
-                <Text style={[styles.summaryValue, { color: "#059669" }]}>
-                  -
-                  {formatCurrency(
-                    (Number(data.subtotal) * Number(data.discount)) / 100,
-                    data.currency,
-                  )}
-                </Text>
+              <View style={{ paddingVertical: 4 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Text style={styles.summaryLabel}>
+                    Discount ({Number(data.discount)}%)
+                  </Text>
+                  <Text style={[styles.summaryValue, { color: "#059669" }]}>
+                    -
+                    {formatCurrency(
+                      (Number(data.subtotal) * Number(data.discount)) / 100,
+                      data.currency,
+                    )}
+                  </Text>
+                </View>
+                {data.discountRemark ? (
+                  <Text
+                    style={{
+                      fontSize: 8,
+                      color: colors.muted,
+                      marginTop: 2,
+                    }}
+                  >
+                    {data.discountRemark}
+                  </Text>
+                ) : null}
               </View>
             )}
 
