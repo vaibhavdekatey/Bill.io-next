@@ -349,6 +349,7 @@ export interface PDFDocumentData {
   subtotal: number;
   taxTotal: number;
   discount: number;
+  discountRemark?: string | null;
   total: number;
   issuerName: string;
   issuerCompany: string;
@@ -363,6 +364,13 @@ export interface PDFDocumentData {
   clientPhone?: string | null;
   notes?: string | null;
   terms?: string | null;
+  bankDetails?: {
+    bankName?: string | null;
+    accountHolder?: string | null;
+    accountNumber?: string | null;
+    ifscSwift?: string | null;
+    upiId?: string | null;
+  } | null;
   items: Array<{
     id: string;
     description: string;
@@ -529,8 +537,65 @@ export default function BillPDF({ data }: { data: PDFDocumentData }) {
 
         {/* ============ SUMMARY AND NOTES ============ */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
-          {/* Notes and Terms */}
+          {/* Notes, Terms, and Bank Details */}
           <View style={{ flex: 1, paddingRight: 20 }}>
+            {data.bankDetails &&
+              (data.bankDetails.bankName ||
+                data.bankDetails.accountNumber ||
+                data.bankDetails.upiId) && (
+                <View
+                  style={{
+                    marginBottom: 10,
+                    padding: 10,
+                    backgroundColor: "#F9FAFB",
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: "#E5E7EB",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 8.5,
+                      fontWeight: 600,
+                      color: colors.secondary,
+                      marginBottom: 4,
+                      textTransform: "uppercase" as any,
+                    }}
+                  >
+                    Payment / Bank Details
+                  </Text>
+                  {data.bankDetails.bankName && (
+                    <Text style={{ fontSize: 8.5, color: colors.primary, marginBottom: 2 }}>
+                      <Text style={{ fontWeight: 600 }}>Bank: </Text>
+                      {data.bankDetails.bankName}
+                    </Text>
+                  )}
+                  {data.bankDetails.accountHolder && (
+                    <Text style={{ fontSize: 8.5, color: colors.primary, marginBottom: 2 }}>
+                      <Text style={{ fontWeight: 600 }}>A/C Name: </Text>
+                      {data.bankDetails.accountHolder}
+                    </Text>
+                  )}
+                  {data.bankDetails.accountNumber && (
+                    <Text style={{ fontSize: 8.5, color: colors.primary, marginBottom: 2 }}>
+                      <Text style={{ fontWeight: 600 }}>A/C No: </Text>
+                      {data.bankDetails.accountNumber}
+                    </Text>
+                  )}
+                  {data.bankDetails.ifscSwift && (
+                    <Text style={{ fontSize: 8.5, color: colors.primary, marginBottom: 2 }}>
+                      <Text style={{ fontWeight: 600 }}>IFSC/SWIFT: </Text>
+                      {data.bankDetails.ifscSwift}
+                    </Text>
+                  )}
+                  {data.bankDetails.upiId && (
+                    <Text style={{ fontSize: 8.5, color: colors.primary }}>
+                      <Text style={{ fontWeight: 600 }}>UPI ID: </Text>
+                      {data.bankDetails.upiId}
+                    </Text>
+                  )}
+                </View>
+              )}
             {data.notes && (
               <View style={{ marginBottom: 10, padding: 10, backgroundColor: "#F9FAFB", borderRadius: 6, borderWidth: 1, borderColor: "#E5E7EB" }}>
                 <Text style={{ fontSize: 9, color: colors.secondary, marginBottom: 4, textTransform: "uppercase" as any }}>
@@ -565,7 +630,8 @@ export default function BillPDF({ data }: { data: PDFDocumentData }) {
             {Number(data.discount) > 0 && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>
-                  Discount ({Number(data.discount)}%)
+                  Discount ({Number(data.discount)}%
+                  {data.discountRemark ? ` - ${data.discountRemark}` : ""})
                 </Text>
                 <Text style={[styles.summaryValue, { color: "#059669" }]}>
                   -

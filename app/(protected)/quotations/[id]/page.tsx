@@ -31,6 +31,7 @@ type QuotationDetail = {
   subtotal: number;
   taxTotal: number;
   discount: number;
+  discountRemark?: string | null;
   total: number;
   issuerName: string;
   issuerCompany: string;
@@ -38,6 +39,8 @@ type QuotationDetail = {
   issuerEmail?: string | null;
   issuerPhone?: string | null;
   issuerWebsite?: string | null;
+  issuerBankDetails?: any;
+  Organization?: any;
   clientName: string;
   clientCompany: string | null;
   clientAddress: any;
@@ -153,6 +156,7 @@ export default function Quotation() {
         subtotal: quotation.subtotal,
         taxTotal: quotation.taxTotal,
         discount: quotation.discount,
+        discountRemark: quotation.discountRemark,
         total: quotation.total,
         issuerName: quotation.issuerName,
         issuerCompany: quotation.issuerCompany,
@@ -167,6 +171,7 @@ export default function Quotation() {
         clientPhone: quotation.clientPhone,
         notes: quotation.notes,
         terms: quotation.terms,
+        bankDetails: (quotation.issuerBankDetails as any) || (quotation.Organization as any)?.bankDetails || (organization?.Organization as any)?.bankDetails,
         items: quotation.QuotationItem,
         logoUrl:
           organization?.Organization?.logoUrl || (organization as any)?.logoUrl,
@@ -281,6 +286,11 @@ export default function Quotation() {
     quotation.validUntil &&
     new Date(quotation.validUntil) < new Date();
   const displayStatus = isOverdue ? "OVERDUE" : quotation.status;
+
+  const bankDetails =
+    (quotation.issuerBankDetails as any) ||
+    (quotation.Organization as any)?.bankDetails ||
+    (organization?.Organization as any)?.bankDetails;
 
   return (
     <main className="w-full overflow-y-auto py-8 px-4 md:px-12">
@@ -531,9 +541,66 @@ export default function Quotation() {
             </div>
           </div>
 
-          {/* Calculations Summary and Notes */}
+          {/* Calculations Summary, Bank Details and Notes */}
           <div className="flex flex-col md:flex-row justify-between gap-8 border-t border-neutral-800 pt-8 print:border-neutral-200 print:flex-row">
             <div className="flex-1 flex flex-col gap-6">
+              {bankDetails &&
+                (bankDetails.bankName ||
+                  bankDetails.accountNumber ||
+                  bankDetails.upiId) && (
+                  <div className="flex flex-col gap-3 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                        Payment / Bank Details
+                      </span>
+                      {bankDetails.upiId && (
+                        <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-mono">
+                          UPI: {bankDetails.upiId}
+                        </span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      {bankDetails.bankName && (
+                        <div>
+                          <span className="text-neutral-500 block">Bank Name</span>
+                          <span className="text-white font-medium print:text-black">
+                            {bankDetails.bankName}
+                          </span>
+                        </div>
+                      )}
+                      {bankDetails.accountHolder && (
+                        <div>
+                          <span className="text-neutral-500 block">
+                            Account Holder
+                          </span>
+                          <span className="text-white font-medium print:text-black">
+                            {bankDetails.accountHolder}
+                          </span>
+                        </div>
+                      )}
+                      {bankDetails.accountNumber && (
+                        <div>
+                          <span className="text-neutral-500 block">
+                            Account Number
+                          </span>
+                          <span className="text-white font-mono font-medium print:text-black">
+                            {bankDetails.accountNumber}
+                          </span>
+                        </div>
+                      )}
+                      {bankDetails.ifscSwift && (
+                        <div>
+                          <span className="text-neutral-500 block">
+                            IFSC / SWIFT
+                          </span>
+                          <span className="text-white font-mono font-medium print:text-black">
+                            {bankDetails.ifscSwift}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               {quotation.notes && (
                 <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
                   <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
@@ -570,17 +637,24 @@ export default function Quotation() {
               </div>
 
               {Number(quotation.discount) > 0 && (
-                <div className="flex justify-between text-sm text-emerald-400">
-                  <span>Discount ({Number(quotation.discount)}%)</span>
-                  <span className="tabular-nums font-light">
-                    -
-                    {formatCurrency(
-                      (Number(quotation.subtotal) *
-                        Number(quotation.discount)) /
-                        100,
-                      quotation.currency,
-                    )}
-                  </span>
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex justify-between text-sm text-emerald-400">
+                    <span>Discount ({Number(quotation.discount)}%)</span>
+                    <span className="tabular-nums font-light">
+                      -
+                      {formatCurrency(
+                        (Number(quotation.subtotal) *
+                          Number(quotation.discount)) /
+                          100,
+                        quotation.currency,
+                      )}
+                    </span>
+                  </div>
+                  {quotation.discountRemark && (
+                    <span className="text-xs text-neutral-500 italic pl-0.5">
+                      {quotation.discountRemark}
+                    </span>
+                  )}
                 </div>
               )}
 

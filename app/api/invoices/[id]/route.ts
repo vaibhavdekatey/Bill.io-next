@@ -39,7 +39,7 @@ export const GET = (req: Request, context: any) =>
         id,
         organizationId,
       },
-      include: { Client: true, InvoiceItem: true, Project: true },
+      include: { Client: true, InvoiceItem: true, Project: true, Organization: true },
     });
 
     if (!invoice) {
@@ -160,6 +160,10 @@ export const PUT = (req: Request, context: any) =>
           notes: body.notes !== undefined ? body.notes || null : invoice.notes,
           terms: body.terms !== undefined ? body.terms || null : invoice.terms,
           discount,
+          discountRemark:
+            body.discountRemark !== undefined
+              ? normalize(body.discountRemark)
+              : invoice.discountRemark,
           updatedAt: new Date(),
           ...(body.items
             ? {

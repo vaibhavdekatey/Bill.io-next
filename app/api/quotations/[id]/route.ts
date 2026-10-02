@@ -39,7 +39,7 @@ export const GET = (req: Request, context: any) =>
         id,
         organizationId,
       },
-      include: { Client: true, QuotationItem: true, Project: true },
+      include: { Client: true, QuotationItem: true, Project: true, Organization: true },
     });
 
     if (!quotation) {
@@ -144,6 +144,10 @@ export const PUT = (req: Request, context: any) =>
           notes: body.notes !== undefined ? body.notes || null : quotation.notes,
           terms: body.terms !== undefined ? body.terms || null : quotation.terms,
           discount,
+          discountRemark:
+            body.discountRemark !== undefined
+              ? normalize(body.discountRemark)
+              : quotation.discountRemark,
           ...(body.items
             ? {
                 QuotationItem: {

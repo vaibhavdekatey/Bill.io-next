@@ -33,7 +33,15 @@ export const GET = (req: Request, context: any) =>
     const action = url.searchParams.get("action");
 
     if (action === "generate") {
-      const getINVNumber = await generateNextNumber(organizationId, "INV");
+      const org = await prisma.organization.findUnique({
+        where: { id: organizationId },
+        select: { invoicePrefix: true },
+      });
+      const getINVNumber = await generateNextNumber(
+        organizationId,
+        "INV",
+        org?.invoicePrefix || "INV"
+      );
       return NextResponse.json(
         {
           statusCode: 200,
@@ -218,8 +226,25 @@ export const POST = (req: Request, context: any) =>
         { status: 401 }
       );
     }
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+    });
+    if (!organization) {
+      return NextResponse.json(
+        { message: "Organization not found", success: false },
+        { status: 404 }
+      );
+    }
 
-    const invNum = await generateNextNumber(organizationId, "INV");
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    const invNum = await generateNextNumber(
+      organizationId,
+      "INV",
+      organization.invoicePrefix || "INV"
+    );
 
     const body = await req.json();
 
@@ -240,22 +265,9 @@ export const POST = (req: Request, context: any) =>
     }
 
     const discount = body.discount !== undefined ? Number(body.discount) : 0;
+    const discountRemark = normalize(body.discountRemark);
 
     const { subtotal, taxTotal, total } = calculateTotals(body.items, discount);
-
-    const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
-    });
-    const currentUser = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!organization) {
-      return NextResponse.json(
-        { message: "Organization not found", success: false },
-        { status: 404 }
-      );
-    }
 
     const invoice = await prisma.invoice.create({
       data: {
@@ -263,7 +275,7 @@ export const POST = (req: Request, context: any) =>
         clientId: client?.id ?? null,
         number: invNum,
         status: body.status ?? "DRAFT",
-        currency: body.currency ?? "INR",
+        currency: body.currency ?? organization.defaultCurrency ?? "INR",
         issueDate: body.issueDate ? new Date(body.issueDate) : new Date(),
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
         subtotal,
@@ -275,8 +287,10 @@ export const POST = (req: Request, context: any) =>
         issuerEmail: organization.email || currentUser?.email || null,
         issuerPhone: organization.phone || currentUser?.phoneNumber || null,
         issuerWebsite: organization.website || null,
+        issuerBankDetails: (organization.bankDetails as any) ?? undefined,
         clientName,
         discount: discount || 0,
+        discountRemark,
         clientCompany,
         clientAddress,
         clientEmail,

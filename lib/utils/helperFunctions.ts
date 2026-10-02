@@ -35,27 +35,36 @@ export const calculateTotals = (items: ItemInput[], discount: number) => {
 export const generateNextNumber = async (
   organizationId: string,
   str: string,
+  customPrefix?: string,
 ) => {
-  if (str === "INV") {
-    const lastInovice = await prisma.invoice.findFirst({
+  const isInvoice = str === "INV";
+  const prefix = (customPrefix && customPrefix.trim()) || (isInvoice ? "INV" : "QUO");
+
+  if (isInvoice) {
+    const lastInvoice = await prisma.invoice.findFirst({
       where: { organizationId },
       orderBy: { createdAt: "desc" },
       select: { number: true },
     });
-    if (!lastInovice) return "INV-001";
-    const match = lastInovice.number.match(/INV-(\d+)/);
+    if (!lastInvoice) return `${prefix}-001`;
+    const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const prefixRegex = new RegExp(`^${escapedPrefix}-(\\d+)$`);
+    const match = lastInvoice.number.match(prefixRegex) || lastInvoice.number.match(/(\d+)$/);
     const lastNumber = match && match[1] ? parseInt(match[1], 10) : 0;
-    return `INV-${String(lastNumber + 1).padStart(3, "0")}`;
+    return `${prefix}-${String(lastNumber + 1).padStart(3, "0")}`;
   }
+
   const lastQuotation = await prisma.quotation.findFirst({
     where: { organizationId },
     orderBy: { createdAt: "desc" },
     select: { number: true },
   });
-  if (!lastQuotation) return "QUO-001";
-  const match = lastQuotation.number.match(/QUO-(\d+)/);
+  if (!lastQuotation) return `${prefix}-001`;
+  const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const prefixRegex = new RegExp(`^${escapedPrefix}-(\\d+)$`);
+  const match = lastQuotation.number.match(prefixRegex) || lastQuotation.number.match(/(\d+)$/);
   const lastNumber = match && match[1] ? parseInt(match[1], 10) : 0;
-  return `QUO-${String(lastNumber + 1).padStart(3, "0")}`;
+  return `${prefix}-${String(lastNumber + 1).padStart(3, "0")}`;
 };
 
 export const getOrganizationIdForUser = async (userId: string, cachedOrgId?: string) => {

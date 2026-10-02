@@ -31,6 +31,7 @@ type InvoiceDetail = {
   subtotal: number;
   taxTotal: number;
   discount: number;
+  discountRemark?: string | null;
   total: number;
   issuerName: string;
   issuerCompany: string;
@@ -38,6 +39,8 @@ type InvoiceDetail = {
   issuerEmail?: string | null;
   issuerPhone?: string | null;
   issuerWebsite?: string | null;
+  issuerBankDetails?: any;
+  Organization?: any;
   clientName: string;
   clientCompany: string | null;
   clientAddress: any;
@@ -149,6 +152,7 @@ export default function Invoice() {
         subtotal: invoice.subtotal,
         taxTotal: invoice.taxTotal,
         discount: invoice.discount,
+        discountRemark: invoice.discountRemark,
         total: invoice.total,
         issuerName: invoice.issuerName,
         issuerCompany: invoice.issuerCompany,
@@ -163,6 +167,7 @@ export default function Invoice() {
         clientPhone: invoice.clientPhone,
         notes: invoice.notes,
         terms: invoice.terms,
+        bankDetails: (invoice.issuerBankDetails as any) || (invoice.Organization as any)?.bankDetails || (organization?.Organization as any)?.bankDetails,
         items: invoice.InvoiceItem,
         logoUrl:
           organization?.Organization?.logoUrl || (organization as any)?.logoUrl,
@@ -244,6 +249,10 @@ export default function Invoice() {
   const displayStatus = isOverdue ? "OVERDUE" : invoice.status;
 
   const parsedIssuerAddress = formatAddress(invoice.issuerAddress);
+  const bankDetails =
+    (invoice.issuerBankDetails as any) ||
+    (invoice.Organization as any)?.bankDetails ||
+    (organization?.Organization as any)?.bankDetails;
 
   return (
     <main className="w-full overflow-y-auto py-8 px-4 md:px-12">
@@ -525,54 +534,120 @@ export default function Invoice() {
             </div>
           </div>
 
-          {/* Calculations Summary and Notes */}
+          {/* Calculations Summary, Bank Details and Notes */}
           <div className="flex flex-col md:flex-row justify-between gap-8 border-t border-neutral-800 pt-8 print:border-neutral-200 print:flex-row">
-            <div className="flex-1 flex flex-col gap-6">
-              {invoice.notes && (
-                <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
-                  <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
-                    Client Note
-                  </span>
-                  <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
-                    {invoice.notes}
-                  </span>
-                </div>
-              )}
-              {invoice.terms && (
-                <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
-                  <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
-                    Payment Terms
-                  </span>
-                  <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
-                    {invoice.terms}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="w-full md:w-80 flex flex-col gap-3 print:w-80">
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-400 print:text-neutral-600">
-                  Subtotal
-                </span>
-                <span className="text-white print:text-black tabular-nums font-light">
-                  {formatCurrency(Number(invoice.subtotal), invoice.currency)}
-                </span>
-              </div>
-
-              {Number(invoice.discount) > 0 && (
-                <div className="flex justify-between text-sm text-emerald-400">
-                  <span>Discount ({Number(invoice.discount)}%)</span>
-                  <span className="tabular-nums font-light">
-                    -
-                    {formatCurrency(
-                      (Number(invoice.subtotal) * Number(invoice.discount)) /
-                        100,
-                      invoice.currency,
+                <div className="flex-1 flex flex-col gap-6">
+                  {bankDetails &&
+                    (bankDetails.bankName ||
+                      bankDetails.accountNumber ||
+                      bankDetails.upiId) && (
+                      <div className="flex flex-col gap-3 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                            Payment / Bank Details
+                          </span>
+                          {bankDetails.upiId && (
+                            <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-mono">
+                              UPI: {bankDetails.upiId}
+                            </span>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                          {bankDetails.bankName && (
+                            <div>
+                              <span className="text-neutral-500 block">Bank Name</span>
+                              <span className="text-white font-medium print:text-black">
+                                {bankDetails.bankName}
+                              </span>
+                            </div>
+                          )}
+                          {bankDetails.accountHolder && (
+                            <div>
+                              <span className="text-neutral-500 block">
+                                Account Holder
+                              </span>
+                              <span className="text-white font-medium print:text-black">
+                                {bankDetails.accountHolder}
+                              </span>
+                            </div>
+                          )}
+                          {bankDetails.accountNumber && (
+                            <div>
+                              <span className="text-neutral-500 block">
+                                Account Number
+                              </span>
+                              <span className="text-white font-mono font-medium print:text-black">
+                                {bankDetails.accountNumber}
+                              </span>
+                            </div>
+                          )}
+                          {bankDetails.ifscSwift && (
+                            <div>
+                              <span className="text-neutral-500 block">
+                                IFSC / SWIFT
+                              </span>
+                              <span className="text-white font-mono font-medium print:text-black">
+                                {bankDetails.ifscSwift}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
-                  </span>
+                  {invoice.notes && (
+                    <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                      <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                        Client Note
+                      </span>
+                      <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
+                        {invoice.notes}
+                      </span>
+                    </div>
+                  )}
+                  {invoice.terms && (
+                    <div className="flex flex-col gap-2 p-5 bg-neutral-900/50 border border-neutral-800 rounded-2xl print:bg-neutral-50 print:border-neutral-200 print:rounded-xl">
+                      <span className="text-xs uppercase tracking-widest text-neutral-500 print:text-black print:font-bold">
+                        Payment Terms
+                      </span>
+                      <span className="text-sm text-neutral-300 whitespace-pre-wrap print:text-neutral-700">
+                        {invoice.terms}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
+
+                <div className="w-full md:w-80 flex flex-col gap-3 print:w-80">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-400 print:text-neutral-600">
+                      Subtotal
+                    </span>
+                    <span className="text-white print:text-black tabular-nums font-light">
+                      {formatCurrency(Number(invoice.subtotal), invoice.currency)}
+                    </span>
+                  </div>
+
+                  {Number(invoice.discount) > 0 && (
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex justify-between text-sm text-emerald-400">
+                        <span>
+                          Discount ({Number(invoice.discount)}%)
+                        </span>
+                        <span className="tabular-nums font-light">
+                          -
+                          {formatCurrency(
+                            (Number(invoice.subtotal) * Number(invoice.discount)) /
+                              100,
+                            invoice.currency,
+                          )}
+                        </span>
+                      </div>
+                      {invoice.discountRemark && (
+                        <span className="text-xs text-neutral-500 italic pl-0.5">
+                          {invoice.discountRemark}
+                        </span>
+                      )}
+                    </div>
+                  )}
 
               <div className="flex justify-between text-sm">
                 <span className="text-neutral-400 print:text-neutral-600">

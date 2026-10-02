@@ -45,14 +45,16 @@ model Invoice {
   dueDate        DateTime?
   subtotal       Decimal
   taxTotal       Decimal
-  discount       Decimal         @default(0)
-  total          Decimal
-  issuerName     String
-  issuerCompany  String
-  issuerAddress  Json?
-  issuerEmail    String?
-  issuerPhone    String?
-  issuerWebsite  String?
+  discount           Decimal         @default(0)
+  discountRemark     String?
+  total              Decimal
+  issuerName         String
+  issuerCompany      String
+  issuerAddress      Json?
+  issuerEmail        String?
+  issuerPhone        String?
+  issuerWebsite      String?
+  issuerBankDetails  Json?
   clientName     String
   clientCompany  String?
   clientAddress  Json?
@@ -142,14 +144,16 @@ model Quotation {
   validUntil     DateTime?
   subtotal       Decimal
   taxTotal       Decimal
-  discount       Decimal         @default(0)
-  total          Decimal
-  issuerName     String
-  issuerCompany  String
-  issuerAddress  Json?
-  issuerEmail    String?
-  issuerPhone    String?
-  issuerWebsite  String?
+  discount           Decimal         @default(0)
+  discountRemark     String?
+  total              Decimal
+  issuerName         String
+  issuerCompany      String
+  issuerAddress      Json?
+  issuerEmail        String?
+  issuerPhone        String?
+  issuerWebsite      String?
+  issuerBankDetails  Json?
   clientName     String
   clientCompany  String?
   clientAddress  Json?

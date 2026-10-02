@@ -48,12 +48,28 @@ type ClientOption = {
   };
 };
 
-const emptyItem = (): LineItem => ({
+const calculateDueDateFromTerms = (termsString: string, baseDateStr?: string) => {
+  const base = baseDateStr ? new Date(baseDateStr) : new Date();
+  if (isNaN(base.getTime())) return "";
+  const lower = (termsString || "").toLowerCase();
+  let days = 30;
+  if (lower.includes("receipt")) {
+    days = 0;
+  } else {
+    const match = lower.match(/\d+/);
+    if (match) days = parseInt(match[0], 10);
+  }
+  const due = new Date(base);
+  due.setDate(due.getDate() + days);
+  return due.toISOString().split("T")[0];
+};
+
+const emptyItem = (taxPercent: number = 0): LineItem => ({
   id: crypto.randomUUID(),
   description: "",
   quantity: 1,
   unitPrice: 0,
-  taxPercent: 18,
+  taxPercent,
 });
 
 export default function NewInvoice() {
@@ -64,11 +80,13 @@ export default function NewInvoice() {
   // Replace this with API data later
   const [clients, setClients] = useState<ClientOption[]>([]);
 
-  const [items, setItems] = useState<LineItem[]>([emptyItem()]);
+  const [orgDefaultTax, setOrgDefaultTax] = useState(0);
+  const [items, setItems] = useState<LineItem[]>([emptyItem(0)]);
   const [clientId, setClientId] = useState("");
   const [saveClient, setSaveClient] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState("Auto-generated");
-  const [discountPercentage, setDiscountPercentage] = useState<number>(10);
+  const [discountPercentage, setDiscountPercentage] = useState<number>(0);
+  const [discountRemark, setDiscountRemark] = useState("");
 
   const [client, setClient] = useState<ClientForm>({
     name: "",
@@ -92,9 +110,7 @@ export default function NewInvoice() {
   const [dueDate, setDueDate] = useState("");
   const [currency, setCurrency] = useState("INR");
   const [notes, setNotes] = useState("");
-  const [terms, setTerms] = useState(
-    "Payment due within 14 days. Late payments may incur a 2% monthly fee.",
-  );
+  const [terms, setTerms] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const selectedClient = useMemo(
@@ -112,7 +128,7 @@ export default function NewInvoice() {
     );
   };
 
-  const addItem = () => setItems((prev) => [...prev, emptyItem()]);
+  const addItem = () => setItems((prev) => [...prev, emptyItem(orgDefaultTax)]);
 
   const removeItem = (id: string) =>
     setItems((prev) =>
@@ -222,6 +238,9 @@ export default function NewInvoice() {
         setIssueDate(inv.issueDate?.split("T")[0] || "");
         setDueDate(inv.dueDate?.split("T")[0] || "");
         setDiscountPercentage(Number(inv.discount) || 0);
+        setDiscountRemark(inv.discountRemark || "");
+        setNotes(inv.notes || "");
+        setTerms(inv.terms || "");
 
         if (!inv.clientId) {
           const addr = inv.clientAddress;
@@ -267,6 +286,30 @@ export default function NewInvoice() {
     fetchInvoice();
   }, [editId]);
 
+  useEffect(() => {
+    if (editId) return;
+    const fetchOrgSettings = async () => {
+      try {
+        const res = await api.get("/organization");
+        const org = res.data?.data;
+        if (org) {
+          if (org.defaultCurrency) setCurrency(org.defaultCurrency);
+          if (org.defaultNotes) setNotes(org.defaultNotes);
+          if (org.defaultTerms) setTerms(org.defaultTerms);
+          const tax = Number(org.defaultTaxRate) || 0;
+          setOrgDefaultTax(tax);
+          setItems([emptyItem(tax)]);
+          if (org.defaultPaymentTerms) {
+            setDueDate(calculateDueDateFromTerms(org.defaultPaymentTerms, issueDate));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch organization settings:", err);
+      }
+    };
+    fetchOrgSettings();
+  }, [editId]);
+
   const handleSubmit = async (status: "DRAFT" | "SENT") => {
     try {
       setSubmitting(true);
@@ -295,6 +338,7 @@ export default function NewInvoice() {
         currency,
         status,
         discount: discountPercentage,
+        discountRemark: discountRemark.trim() || undefined,
         notes: notes.trim() || undefined,
         terms: terms.trim() || undefined,
         items: items.map((item) => ({
@@ -791,11 +835,29 @@ export default function NewInvoice() {
                 />
               </div>
 
-              <TotalRow
-                className="text-red-700"
-                label={`Discount (${discountPercentage}%)`}
-                value={`-₹${discountAmount.toLocaleString("en-IN")}`}
-              />
+              {discountPercentage > 0 && (
+                <div className="w-full flex flex-col sm:flex-row justify-between sm:items-center gap-1.5 text-sm text-neutral-400">
+                  <label htmlFor="discountRemark" className="text-xs">
+                    Discount Remark / Reason
+                  </label>
+                  <input
+                    id="discountRemark"
+                    type="text"
+                    placeholder="e.g. Festive offer, 10% partner rate"
+                    className="w-full sm:w-64 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600"
+                    value={discountRemark}
+                    onChange={(e) => setDiscountRemark(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {discountPercentage > 0 && (
+                <TotalRow
+                  className="text-emerald-400"
+                  label={`Discount (${discountPercentage}%${discountRemark ? ` — ${discountRemark}` : ""})`}
+                  value={`-₹${discountAmount.toLocaleString("en-IN")}`}
+                />
+              )}
               <TotalRow
                 label="GST"
                 value={`₹${taxTotal.toLocaleString("en-IN")}`}
@@ -852,9 +914,13 @@ export default function NewInvoice() {
             </MetaField>
             <MetaField label="Currency">
               <Select value={currency} onChange={setCurrency}>
-                <option value="INR">₹ INR</option>
-                <option value="USD">$ USD</option>
-                <option value="EUR">€ EUR</option>
+                <option value="INR">₹ INR (Indian Rupee)</option>
+                <option value="USD">$ USD (US Dollar)</option>
+                <option value="EUR">€ EUR (Euro)</option>
+                <option value="GBP">£ GBP (British Pound)</option>
+                <option value="CAD">$ CAD (Canadian Dollar)</option>
+                <option value="AUD">$ AUD (Australian Dollar)</option>
+                <option value="AED">د.إ AED (UAE Dirham)</option>
               </Select>
             </MetaField>
           </Panel>
