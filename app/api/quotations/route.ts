@@ -262,6 +262,7 @@ export const POST = (req: Request, context: any) =>
             description: item.description.trim(),
             quantity: Number(item.quantity),
             unitPrice: Number(item.unitPrice),
+            taxPercent: Number(item.taxPercent) || 0,
             total: Number(item.quantity) * Number(item.unitPrice),
           })),
         },

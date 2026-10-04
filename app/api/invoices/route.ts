@@ -267,12 +267,28 @@ export const POST = (req: Request, context: any) =>
     const discount = body.discount !== undefined ? Number(body.discount) : 0;
     const discountRemark = normalize(body.discountRemark);
 
+    let validProjectId: string | null = null;
+    if (body.projectId) {
+      const project = await prisma.project.findFirst({
+        where: { id: body.projectId, organizationId },
+        select: { id: true },
+      });
+      if (!project) {
+        return NextResponse.json(
+          { message: "Project not found in this organization", success: false },
+          { status: 400 }
+        );
+      }
+      validProjectId = project.id;
+    }
+
     const { subtotal, taxTotal, total } = calculateTotals(body.items, discount);
 
     const invoice = await prisma.invoice.create({
       data: {
         organizationId,
         clientId: client?.id ?? null,
+        projectId: validProjectId,
         number: invNum,
         status: body.status ?? "DRAFT",
         currency: body.currency ?? organization.defaultCurrency ?? "INR",
@@ -303,6 +319,7 @@ export const POST = (req: Request, context: any) =>
             description: item.description.trim(),
             quantity: Number(item.quantity),
             unitPrice: Number(item.unitPrice),
+            taxPercent: Number(item.taxPercent) || 0,
             total: Number(item.quantity) * Number(item.unitPrice),
           })),
         },

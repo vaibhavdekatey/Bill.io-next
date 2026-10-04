@@ -5,7 +5,7 @@ import { ApiError } from "./utils/ApiError";
 export function withAuth(
   handler: (
     req: Request,
-    user: { userId: string; id: string; orgId?: string },
+    user: { userId: string; id: string; orgId?: string; orgRole?: string },
     context?: any
   ) => Promise<NextResponse>
 ) {
@@ -19,6 +19,7 @@ export function withAuth(
         userId: session.user.id,
         id: session.user.id,
         orgId: (session.user as any).orgId as string | undefined,
+        orgRole: (session.user as any).orgRole as string | undefined,
       };
       return await handler(req, user, context);
     } catch (error: any) {

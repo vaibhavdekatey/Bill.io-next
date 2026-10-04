@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import {
   calculateTotals,
   getOrganizationIdForUser,
+  isOrgAdminOrOwner,
   normalize,
   resolveClient,
 } from "@/lib/utils/helperFunctions";
@@ -29,7 +30,7 @@ export const GET = (req: Request, context: any) =>
     const organizationId = user?.orgId || await getOrganizationIdForUser(userId);
     if (!organizationId) {
       return NextResponse.json(
-        { message: "Organizatiion not found for the user", success: false },
+        { message: "Organization not found for user", success: false },
         { status: 401 }
       );
     }
@@ -73,14 +74,14 @@ export const PUT = (req: Request, context: any) =>
     const id = (await context.params).id;
     if (!id || typeof id !== "string") {
       return NextResponse.json(
-        { message: "Invoice Id for updating status is required", success: false },
+        { message: "Invoice ID is required", success: false },
         { status: 400 }
       );
     }
 
     const body = await req.json();
     const { status } = body;
-    if (!status || !["DRAFT", "SENT", "PAID", "CANCELLED"].includes(status)) {
+    if (status && !["DRAFT", "SENT", "PAID", "CANCELLED"].includes(status)) {
       return NextResponse.json(
         { message: "Invalid Status", success: false },
         { status: 400 }
@@ -129,6 +130,25 @@ export const PUT = (req: Request, context: any) =>
 
     const { subtotal, taxTotal, total } = calculateTotals(items, discount);
 
+    let validProjectId = invoice.projectId;
+    if (body.projectId !== undefined) {
+      if (body.projectId === null || body.projectId === "") {
+        validProjectId = null;
+      } else {
+        const project = await prisma.project.findFirst({
+          where: { id: body.projectId, organizationId },
+          select: { id: true },
+        });
+        if (!project) {
+          return NextResponse.json(
+            { message: "Project not found in this organization", success: false },
+            { status: 400 }
+          );
+        }
+        validProjectId = project.id;
+      }
+    }
+
     const updatedInvoice = await prisma.$transaction(async (tx: any) => {
       if (body.items) {
         await tx.invoiceItem.deleteMany({
@@ -140,6 +160,7 @@ export const PUT = (req: Request, context: any) =>
         where: { id },
         data: {
           clientId: client?.id ?? invoice.clientId,
+          projectId: validProjectId,
           status: body.status ?? invoice.status,
           currency: body.currency ?? invoice.currency,
           issueDate: body.issueDate
@@ -172,6 +193,7 @@ export const PUT = (req: Request, context: any) =>
                     description: item.description.trim(),
                     quantity: Number(item.quantity),
                     unitPrice: Number(item.unitPrice),
+                    taxPercent: Number(item.taxPercent) || 0,
                     total: Number(item.quantity) * Number(item.unitPrice),
                   })),
                 },
@@ -278,7 +300,7 @@ export const DELETE = (req: Request, context: any) =>
     const id = (await context.params).id;
     if (!id || typeof id !== "string") {
       return NextResponse.json(
-        { message: "Invoice Id for updating status is required", success: false },
+        { message: "Invoice ID is required", success: false },
         { status: 400 }
       );
     }
@@ -287,11 +309,18 @@ export const DELETE = (req: Request, context: any) =>
     if (!organizationId) {
       return NextResponse.json(
         {
-          message:
-            "Organizatiion not found for the user for updating the invoice status",
+          message: "Organization not found for user",
           success: false,
         },
         { status: 401 }
+      );
+    }
+
+    const isAdmin = await isOrgAdminOrOwner(userId, organizationId, user?.orgRole);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Only organization Owners or Admins can delete invoices" },
+        { status: 403 }
       );
     }
 
@@ -300,8 +329,18 @@ export const DELETE = (req: Request, context: any) =>
     });
     if (!invoice) {
       return NextResponse.json(
-        { message: "Invoice for updating status not found", success: false },
+        { message: "Invoice not found", success: false },
         { status: 404 }
+      );
+    }
+
+    if (invoice.status === "PAID") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Paid invoices cannot be deleted for accounting compliance. Please mark as CANCELLED instead.",
+        },
+        { status: 400 }
       );
     }
 

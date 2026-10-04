@@ -39,7 +39,17 @@ export const POST = (req: Request, context: any) => withAuth(async (req, user, c
   const address = body.address;
 
   if (!name) {
-    return NextResponse.json({ message: "Client name is Required" }, { status: 400 });
+    return NextResponse.json({ message: "Client name is Required", success: false }, { status: 400 });
+  }
+
+  const existing = await prisma.client.findFirst({
+    where: { organizationId, name },
+  });
+  if (existing) {
+    return NextResponse.json(
+      { message: "A client with this name already exists in your organization", success: false },
+      { status: 409 }
+    );
   }
 
   const client = await prisma.client.create({

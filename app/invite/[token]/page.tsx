@@ -13,9 +13,34 @@ export default function InviteAcceptPage({ params }: { params: Promise<{ token: 
   const router = useRouter();
   const { user, loading: authLoading, update } = useAuth();
 
+  const [inviteData, setInviteData] = useState<{
+    organizationName: string;
+    logoUrl?: string | null;
+    role: string;
+    title?: string | null;
+    email: string;
+  } | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (!token) return;
+    api
+      .get(`/team/invite?token=${token}`)
+      .then((res) => {
+        if (res.data?.success) {
+          setInviteData(res.data.data);
+        }
+      })
+      .catch((err) => {
+        setError(err.response?.data?.message || "Invalid or expired invitation link");
+      })
+      .finally(() => {
+        setInviteLoading(false);
+      });
+  }, [token]);
 
   const handleJoin = async () => {
     try {
@@ -41,16 +66,26 @@ export default function InviteAcceptPage({ params }: { params: Promise<{ token: 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 font-lexend">
       <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-3xl p-8 flex flex-col items-center text-center gap-6 shadow-2xl">
-        <div className="h-10">
-          <img src="/bill.io_ico.svg" alt="Bill.io" className="h-full w-auto" />
+        <div className="h-12 flex items-center justify-center">
+          {inviteData?.logoUrl ? (
+            <img
+              src={inviteData.logoUrl}
+              alt={inviteData.organizationName}
+              className="h-12 w-auto max-w-[140px] object-contain rounded-lg"
+            />
+          ) : (
+            <img src="/bill.io_ico.svg" alt="Bill.io" className="h-10 w-auto" />
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-light -tracking-[3%] text-white">
-            Workspace Invitation
+          <h1 className="text-2xl font-light -tracking-[3%] text-white">
+            {inviteData ? `Join ${inviteData.organizationName}` : "Workspace Invitation"}
           </h1>
           <p className="text-sm text-neutral-400 font-light">
-            You have been invited to collaborate with a team on Bill.io
+            {inviteData
+              ? `You've been invited to join as an ${inviteData.role.toLowerCase()}`
+              : "You have been invited to collaborate with a team on Bill.io"}
           </p>
         </div>
 
@@ -66,8 +101,17 @@ export default function InviteAcceptPage({ params }: { params: Promise<{ token: 
           </div>
         )}
 
-        {authLoading ? (
-          <div className="text-sm text-neutral-500 font-light py-4">Checking credentials...</div>
+        {inviteLoading || authLoading ? (
+          <div className="text-sm text-neutral-500 font-light py-4">Verifying invitation...</div>
+        ) : error ? (
+          <div className="w-full flex flex-col gap-3">
+            <Link
+              href={user ? "/dashboard" : "/login"}
+              className="w-full py-3 text-center cursor-pointer rounded-full bg-neutral-900 border border-neutral-800 text-white hover:bg-neutral-800 text-sm font-medium transition-colors"
+            >
+              {user ? "Go to Dashboard" : "Return to Login"}
+            </Link>
+          </div>
         ) : user ? (
           <div className="w-full flex flex-col gap-4">
             <div className="p-4 rounded-2xl bg-neutral-900/50 border border-neutral-800 text-left flex flex-col gap-1">
@@ -81,7 +125,7 @@ export default function InviteAcceptPage({ params }: { params: Promise<{ token: 
               disabled={joining || !!success}
               className="w-full py-3.5 cursor-pointer rounded-full bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 text-sm font-medium transition-colors"
             >
-              {joining ? "Joining Workspace..." : success ? "Redirecting..." : "Accept & Join Workspace"}
+              {joining ? "Joining Workspace..." : success ? "Redirecting..." : `Accept & Join ${inviteData?.organizationName || "Workspace"}`}
             </button>
           </div>
         ) : (

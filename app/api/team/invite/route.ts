@@ -88,3 +88,63 @@ export const POST = (req: Request, context: any) =>
       { status: 201 }
     );
   })(req, context);
+
+// GET /api/team/invite?token=xyz — public preview of invite details
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get("token")?.trim();
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Token parameter is required" },
+        { status: 400 }
+      );
+    }
+
+    const invite = await prisma.organizationInvite.findUnique({
+      where: { token },
+      include: {
+        Organization: {
+          select: {
+            name: true,
+            logoUrl: true,
+          },
+        },
+      },
+    });
+
+    if (!invite) {
+      return NextResponse.json(
+        { success: false, message: "Invitation not found or has already been accepted" },
+        { status: 404 }
+      );
+    }
+
+    if (new Date(invite.expiresAt) < new Date()) {
+      return NextResponse.json(
+        { success: false, message: "This invitation link has expired", expired: true },
+        { status: 410 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        organizationName: invite.Organization.name,
+        logoUrl: invite.Organization.logoUrl,
+        role: invite.role,
+        title: invite.title,
+        email: invite.email,
+        expiresAt: invite.expiresAt,
+      },
+    });
+  } catch (error) {
+    console.error("Invite lookup error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+

@@ -2,6 +2,7 @@ import { withAuth } from "@/lib/api-handler";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getOrganizationIdForUser } from "@/lib/utils/helperFunctions";
+import { formatCurrency } from "@/lib/utils/calculations";
 
 // GET /api/timeline — aggregate cashflow milestones, project deadlines, and activities
 export const GET = (req: Request, context: any) =>
@@ -105,7 +106,7 @@ export const GET = (req: Request, context: any) =>
         type: "INVOICE_PAID",
         title: `Payment Received for ${inv.number}`,
         description: `Payment from ${inv.clientName} was marked as Paid`,
-        amount: `${inv.currency} ${Number(inv.total).toLocaleString("en-IN")}`,
+        amount: formatCurrency(Number(inv.total), inv.currency),
         date: inv.updatedAt,
         badge: "Paid",
         link: `/invoices/${inv.id}`,
@@ -121,7 +122,7 @@ export const GET = (req: Request, context: any) =>
         type: "INVOICE_DUE",
         title: `${inv.number} ${isPast ? "Overdue" : "Due"}`,
         description: `Due from ${inv.clientName}`,
-        amount: `${inv.currency} ${Number(inv.total).toLocaleString("en-IN")}`,
+        amount: formatCurrency(Number(inv.total), inv.currency),
         date: new Date(inv.dueDate),
         badge: isPast ? "Overdue" : "Due Soon",
         link: `/invoices/${inv.id}`,
@@ -136,7 +137,7 @@ export const GET = (req: Request, context: any) =>
         type: "QUOTATION_EXPIRING",
         title: `Quotation ${quo.number} Expiration`,
         description: `Offer for ${quo.clientName} expires`,
-        amount: `${quo.currency} ${Number(quo.total).toLocaleString("en-IN")}`,
+        amount: formatCurrency(Number(quo.total), quo.currency),
         date: new Date(quo.validUntil),
         badge: "Expires",
         link: `/quotations/${quo.id}`,

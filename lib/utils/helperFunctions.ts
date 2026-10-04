@@ -1,36 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { ApiError } from "./ApiError";
 
-type ItemInput = {
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  taxPercent?: number;
-};
+import { normalize } from "./calculations";
 
-export const normalize = (value?: string | null) => value?.trim() || null;
-
-export const calculateTotals = (items: ItemInput[], discount: number) => {
-  const subtotal = items.reduce(
-    (sum, item) => sum + Number(item.quantity) * Number(item.unitPrice),
-    0,
-  );
-
-  const discountedAmount = (subtotal * discount) / 100;
-
-  const discountedSubtotal = subtotal - discountedAmount;
-
-  const taxTotal = items.reduce((sum, item) => {
-    const lineBase = Number(item.quantity) * Number(item.unitPrice);
-    return sum + (lineBase * Number(item.taxPercent || 0)) / 100;
-  }, 0);
-
-  return {
-    subtotal,
-    taxTotal,
-    total: subtotal - discountedAmount + taxTotal,
-  };
-};
+export * from "./calculations";
 
 export const generateNextNumber = async (
   organizationId: string,
@@ -80,6 +53,27 @@ export const getOrganizationIdForUser = async (userId: string, cachedOrgId?: str
   }
 
   return membership.organizationId;
+};
+
+export const getUserRoleInOrg = async (userId: string, organizationId: string): Promise<string> => {
+  const member = await prisma.organizationMember.findFirst({
+    where: { userId, organizationId },
+    select: { role: true },
+  });
+  return member?.role?.toUpperCase() || "MEMBER";
+};
+
+export const isOrgAdminOrOwner = async (
+  userId: string,
+  organizationId: string,
+  cachedRole?: string,
+): Promise<boolean> => {
+  if (cachedRole !== undefined && cachedRole !== null) {
+    const roleUpper = cachedRole.toUpperCase();
+    return roleUpper === "OWNER" || roleUpper === "ADMIN";
+  }
+  const role = await getUserRoleInOrg(userId, organizationId);
+  return ["OWNER", "ADMIN"].includes(role);
 };
 
 export const resolveClient = async (organizationId: string, body: any) => {
@@ -137,7 +131,6 @@ export const resolveClient = async (organizationId: string, body: any) => {
       where: {
         organizationId,
         name: clientName,
-        companyName,
       },
     });
   }

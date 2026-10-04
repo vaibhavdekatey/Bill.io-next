@@ -6,6 +6,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
 import PillButton from "@/components/PillButton";
 import { useAuth } from "@/context/AuthContext";
+import { formatCurrency, round2 } from "@/lib/utils/calculations";
 
 type LineItem = {
   id: string;
@@ -136,27 +137,38 @@ export default function NewInvoice() {
     );
 
   const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0),
-    [items],
-  );
-
-  const taxTotal = useMemo(
     () =>
-      items.reduce(
-        (sum, item) =>
-          sum + (item.quantity * item.unitPrice * item.taxPercent) / 100,
-        0,
+      round2(
+        items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0),
       ),
     [items],
   );
 
   const discountAmount = useMemo(
-    () => (subtotal * discountPercentage) / 100,
+    () => round2((subtotal * discountPercentage) / 100),
     [subtotal, discountPercentage],
   );
 
+  const discountFactor = useMemo(
+    () => 1 - Math.min(100, Math.max(0, discountPercentage)) / 100,
+    [discountPercentage],
+  );
+
+  const taxTotal = useMemo(
+    () =>
+      round2(
+        items.reduce(
+          (sum, item) =>
+            sum +
+            (item.quantity * item.unitPrice * discountFactor * (Number(item.taxPercent) || 0)) / 100,
+          0,
+        ),
+      ),
+    [items, discountFactor],
+  );
+
   const total = useMemo(
-    () => subtotal - discountAmount + taxTotal,
+    () => round2(subtotal - discountAmount + taxTotal),
     [subtotal, discountAmount, taxTotal],
   );
 
@@ -276,7 +288,7 @@ export default function NewInvoice() {
             description: item.description,
             quantity: Number(item.quantity),
             unitPrice: Number(item.unitPrice),
-            taxPercent: 0,
+            taxPercent: Number(item.taxPercent) || 0,
           })),
         );
       } catch (err) {
@@ -816,7 +828,7 @@ export default function NewInvoice() {
             <div className="mt-4 flex flex-col gap-2 border-t border-neutral-800 pt-4">
               <TotalRow
                 label="Subtotal"
-                value={`₹${subtotal.toLocaleString("en-IN")}`}
+                value={formatCurrency(subtotal, currency)}
               />
               <div className="w-full flex flex-row justify-between items-center text-sm text-neutral-400">
                 <label htmlFor="discount">Discount %</label>
@@ -855,16 +867,16 @@ export default function NewInvoice() {
                 <TotalRow
                   className="text-emerald-400"
                   label={`Discount (${discountPercentage}%${discountRemark ? ` — ${discountRemark}` : ""})`}
-                  value={`-₹${discountAmount.toLocaleString("en-IN")}`}
+                  value={`-${formatCurrency(discountAmount, currency)}`}
                 />
               )}
               <TotalRow
                 label="GST"
-                value={`₹${taxTotal.toLocaleString("en-IN")}`}
+                value={formatCurrency(taxTotal, currency)}
               />
               <TotalRow
                 label="Total"
-                value={`₹${total.toLocaleString("en-IN")}`}
+                value={formatCurrency(total, currency)}
                 bold
               />
             </div>

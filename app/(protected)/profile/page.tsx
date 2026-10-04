@@ -128,6 +128,8 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [removingLogo, setRemovingLogo] = useState(false);
 
+  const isManager = ["OWNER", "ADMIN"].includes(organization?.role?.toUpperCase() || "");
+
   // edit profile modal
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: "", phoneNumber: "" });
@@ -324,15 +326,17 @@ export default function ProfilePage() {
         {/* ── Organization Card ── */}
         {currentOrg && (
           <div className="bg-neutral-950 border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col gap-6 shadow-xl relative">
-            <button
-              onClick={openOrgModal}
-              className="absolute top-6 right-6 md:top-8 md:right-8 text-neutral-400 hover:text-white transition-colors flex gap-2 items-center text-sm border border-neutral-800 rounded-full px-4 py-2 hover:border-neutral-600 cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-              </svg>
-              <span className="hidden sm:inline">Edit Organization</span>
-            </button>
+            {isManager && (
+              <button
+                onClick={openOrgModal}
+                className="absolute top-6 right-6 md:top-8 md:right-8 text-neutral-400 hover:text-white transition-colors flex gap-2 items-center text-sm border border-neutral-800 rounded-full px-4 py-2 hover:border-neutral-600 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                </svg>
+                <span className="hidden sm:inline">Edit Organization</span>
+              </button>
+            )}
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <span className="text-xs uppercase tracking-widest text-neutral-500">Organization</span>
@@ -341,29 +345,30 @@ export default function ProfilePage() {
             {/* Logo section */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
               <div
-                className={`relative group ${uploading || removingLogo ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-                onClick={() => { if (!uploading && !removingLogo) fileInputRef.current?.click(); }}
+                className={`relative group ${isManager && !uploading && !removingLogo ? "cursor-pointer" : "cursor-default"}`}
+                onClick={() => { if (isManager && !uploading && !removingLogo) fileInputRef.current?.click(); }}
               >
                 {currentOrg.logoUrl ? (
                   <img
                     src={currentOrg.logoUrl.startsWith("http") ? currentOrg.logoUrl : `http://localhost:3000${currentOrg.logoUrl}`}
                     alt={currentOrg.name}
-                    className="h-16 w-auto rounded-md p-1 object-contain border border-neutral-700 group-hover:opacity-50 transition-opacity"
+                    className="h-16 w-auto rounded-md p-1 object-contain border border-neutral-700"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-2xl bg-neutral-900 border border-neutral-700 flex items-center justify-center text-lg font-semibold text-neutral-400 group-hover:bg-neutral-800 transition-colors">
+                  <div className="w-16 h-16 rounded-2xl bg-neutral-900 border border-neutral-700 flex items-center justify-center text-lg font-semibold text-neutral-400">
                     {getInitials(currentOrg.name)}
                   </div>
                 )}
-                {(uploading || removingLogo) ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
+                {isManager && (uploading || removingLogo) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
                     <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                   </div>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                )}
+                {isManager && !uploading && !removingLogo && (
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-2xl">
                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -374,27 +379,31 @@ export default function ProfilePage() {
 
               <div className="flex flex-col gap-2">
                 <h3 className="text-xl font-light text-white">{currentOrg.name}</h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => { if (!uploading && !removingLogo) fileInputRef.current?.click(); }}
-                    disabled={uploading || removingLogo}
-                    className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    {uploading ? "Uploading…" : "Upload logo"}
-                  </button>
-                  {currentOrg.logoUrl && !uploading && !removingLogo && (
-                    <>
-                      <span className="text-neutral-700 text-xs">·</span>
+                {isManager && (
+                  <>
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={handleLogoRemove}
-                        className="text-xs text-red-500/70 hover:text-red-400 transition-colors cursor-pointer"
+                        onClick={() => { if (!uploading && !removingLogo) fileInputRef.current?.click(); }}
+                        disabled={uploading || removingLogo}
+                        className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        {removingLogo ? "Removing…" : "Remove"}
+                        {uploading ? "Uploading…" : "Upload logo"}
                       </button>
-                    </>
-                  )}
-                </div>
-                <span className="text-[11px] text-neutral-700">JPEG or PNG, max 2 MB</span>
+                      {currentOrg.logoUrl && !uploading && !removingLogo && (
+                        <>
+                          <span className="text-neutral-700 text-xs">·</span>
+                          <button
+                            onClick={handleLogoRemove}
+                            className="text-xs text-red-500/70 hover:text-red-400 transition-colors cursor-pointer"
+                          >
+                            {removingLogo ? "Removing…" : "Remove"}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-neutral-700">JPEG or PNG, max 2 MB</span>
+                  </>
+                )}
               </div>
 
               <input

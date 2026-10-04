@@ -4,6 +4,12 @@ import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./lib/prisma";
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
+import { authRateLimiter } from "./lib/rate-limiter";
+
+function toPlainJson<T>(obj: T): T {
+  if (obj === null || obj === undefined) return obj;
+  return JSON.parse(JSON.stringify(obj));
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -20,7 +26,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const input = (credentials.email as string).trim();
+        const input = (credentials.email as string).trim().toLowerCase();
+
+        // Rate limit credential attempts per email
+        const rateCheck = authRateLimiter.check(`auth:${input}`);
+        if (!rateCheck.allowed) {
+          throw new Error("Too many login attempts. Please try again later.");
+        }
 
         // 1. Try exact match on providerAccountId
         let account = await prisma.authAccount.findUnique({
@@ -54,6 +66,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           account.passwordHash
         );
         if (!isValid) return null;
+
+        // Reset rate limit on successful credentials
+        authRateLimiter.reset(`auth:${input}`);
 
         return {
           id: account.User.id,
@@ -104,13 +119,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
+        const userEmail = (user.email || token.email) as string | undefined;
 
-        const dbUser = await prisma.user.findUnique({ where: { email: token.email! } });
-        if (dbUser) {
-          token.id = dbUser.id;
-          if (dbUser.name) token.name = dbUser.name;
-          // @ts-ignore
-          token.phoneNumber = dbUser.phoneNumber;
+        if (userEmail) {
+          const dbUser = await prisma.user.findUnique({ where: { email: userEmail } });
+          if (dbUser) {
+            token.id = dbUser.id;
+            if (dbUser.name) token.name = dbUser.name;
+            // @ts-ignore
+            token.phoneNumber = dbUser.phoneNumber;
+          }
         }
 
         const orgMember = await prisma.organizationMember.findFirst({
@@ -120,7 +138,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.orgId = orgMember?.organizationId;
         token.orgTitle = orgMember?.title;
         token.orgRole = orgMember?.role;
-        token.organization = orgMember ? JSON.parse(JSON.stringify(orgMember)) : orgMember;
+        token.organization = toPlainJson(orgMember);
         token.onBoardingComplete = !!orgMember;
       }
 
@@ -141,7 +159,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.orgId = orgMember.organizationId;
           token.orgTitle = orgMember.title;
           token.orgRole = orgMember.role;
-          token.organization = orgMember ? JSON.parse(JSON.stringify(orgMember)) : orgMember;
+          token.organization = toPlainJson(orgMember);
           token.onBoardingComplete = true;
         }
       }
@@ -156,7 +174,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.orgId = orgMember.organizationId;
           token.orgTitle = orgMember.title;
           token.orgRole = orgMember.role;
-          token.organization = orgMember ? JSON.parse(JSON.stringify(orgMember)) : orgMember;
+          token.organization = toPlainJson(orgMember);
           token.onBoardingComplete = true;
         }
       }

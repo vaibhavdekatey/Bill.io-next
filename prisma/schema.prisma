@@ -79,6 +79,7 @@ model InvoiceItem {
   description String
   quantity    Decimal
   unitPrice   Decimal
+  taxPercent  Decimal @default(0)
   total       Decimal
   Invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
@@ -177,6 +178,7 @@ model QuotationItem {
   description String
   quantity    Decimal
   unitPrice   Decimal
+  taxPercent  Decimal   @default(0)
   total       Decimal
   Quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
 }

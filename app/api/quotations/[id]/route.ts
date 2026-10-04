@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import {
   calculateTotals,
   getOrganizationIdForUser,
+  isOrgAdminOrOwner,
   normalize,
   resolveClient,
 } from "@/lib/utils/helperFunctions";
@@ -155,6 +156,7 @@ export const PUT = (req: Request, context: any) =>
                     description: item.description.trim(),
                     quantity: Number(item.quantity),
                     unitPrice: Number(item.unitPrice),
+                    taxPercent: Number(item.taxPercent) || 0,
                     total: Number(item.quantity) * Number(item.unitPrice),
                   })),
                 },
@@ -270,6 +272,14 @@ export const DELETE = (req: Request, context: any) =>
       );
     }
 
+    const isAdmin = await isOrgAdminOrOwner(userId, organizationId, user?.orgRole);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Only organization Owners or Admins can delete quotations" },
+        { status: 403 }
+      );
+    }
+
     const quotation = await prisma.quotation.findFirst({
       where: { id, organizationId },
     });
@@ -277,6 +287,19 @@ export const DELETE = (req: Request, context: any) =>
       return NextResponse.json(
         { message: "Quotation not found", success: false },
         { status: 404 }
+      );
+    }
+
+    const projectCount = await prisma.project.count({
+      where: { quotationId: id },
+    });
+    if (projectCount > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Cannot delete quotation: a project has already been created from this quotation.",
+        },
+        { status: 409 }
       );
     }
 

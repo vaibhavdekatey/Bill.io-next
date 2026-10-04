@@ -1,7 +1,7 @@
 import { withAuth } from "@/lib/api-handler";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getOrganizationIdForUser } from "@/lib/utils/helperFunctions";
+import { getOrganizationIdForUser, isOrgAdminOrOwner } from "@/lib/utils/helperFunctions";
 
 // GET /api/organization — fetch current org data
 export const GET = (req: Request, context: any) =>
@@ -29,6 +29,14 @@ export const GET = (req: Request, context: any) =>
 export const PATCH = (req: Request, context: any) =>
   withAuth(async (req, user) => {
     const organizationId = user.orgId || await getOrganizationIdForUser(user.userId);
+
+    const isAdmin = await isOrgAdminOrOwner(user.userId, organizationId, user.orgRole);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Only organization Owners or Admins can update organization settings" },
+        { status: 403 }
+      );
+    }
     const body = await req.json();
 
     const normalize = (v: any) =>

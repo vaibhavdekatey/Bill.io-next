@@ -1,7 +1,7 @@
 import { withAuth } from "@/lib/api-handler";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getOrganizationIdForUser } from "@/lib/utils/helperFunctions";
+import { getOrganizationIdForUser, isOrgAdminOrOwner } from "@/lib/utils/helperFunctions";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -41,6 +41,14 @@ export const POST = (req: Request, context: any) =>
       return NextResponse.json(
         { message: "Organization not found for user" },
         { status: 404 },
+      );
+    }
+
+    const isAdmin = await isOrgAdminOrOwner(user.userId, organizationId, user.orgRole);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Only organization Owners or Admins can upload a logo" },
+        { status: 403 },
       );
     }
 
@@ -171,6 +179,14 @@ export const DELETE = (req: Request, context: any) =>
       return NextResponse.json(
         { message: "Organization not found for user" },
         { status: 404 },
+      );
+    }
+
+    const isAdmin = await isOrgAdminOrOwner(user.userId, organizationId, user.orgRole);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Only organization Owners or Admins can remove the logo" },
+        { status: 403 },
       );
     }
 
