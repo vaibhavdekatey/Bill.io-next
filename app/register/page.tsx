@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import CustomGoogleButton from "@/components/CustomGoogleButton";
 
 const Register = () => {
-  const { register, onBoardingComplete } = useAuth();
+  const { register, user, loading: authLoading, onBoardingComplete } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(onBoardingComplete ? "/dashboard" : "/onboarding");
+    }
+  }, [user, authLoading, onBoardingComplete, router]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");

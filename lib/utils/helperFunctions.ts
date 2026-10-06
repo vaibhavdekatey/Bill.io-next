@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { ApiError } from "./ApiError";
+import crypto from "crypto";
 
 import { normalize } from "./calculations";
 
 export * from "./calculations";
+
+export const generateShareToken = (): string => {
+  return crypto.randomBytes(16).toString("hex");
+};
 
 export const generateNextNumber = async (
   organizationId: string,

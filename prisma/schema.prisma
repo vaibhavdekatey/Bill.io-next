@@ -39,6 +39,7 @@ model Invoice {
   organizationId String
   clientId       String?
   number         String
+  shareToken     String?         @unique
   status         InvoiceStatus
   currency       String
   issueDate      DateTime
@@ -140,6 +141,7 @@ model Quotation {
   id             String          @id @default(uuid())
   organizationId String
   number         String
+  shareToken     String?         @unique
   status         QuotationStatus
   currency       String
   validUntil     DateTime?

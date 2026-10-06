@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateTotals,
+  generateShareToken,
   getOrganizationIdForUser,
   isOrgAdminOrOwner,
   normalize,
@@ -48,6 +49,15 @@ export const GET = (req: Request, context: any) =>
         { message: "Invoice not found", success: false },
         { status: 404 }
       );
+    }
+
+    if (!invoice.shareToken) {
+      const shareToken = generateShareToken();
+      await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { shareToken },
+      });
+      invoice.shareToken = shareToken;
     }
 
     return NextResponse.json(

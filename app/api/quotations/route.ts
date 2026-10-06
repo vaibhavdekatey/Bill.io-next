@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import {
   calculateTotals,
   generateNextNumber,
+  generateShareToken,
   getOrganizationIdForUser,
   normalize,
   resolveClient,
@@ -235,6 +236,7 @@ export const POST = (req: Request, context: any) =>
         organizationId,
         clientId: client?.id ?? null,
         number: invNum,
+        shareToken: generateShareToken(),
         status: body.status ?? "DRAFT",
         currency: body.currency ?? organization.defaultCurrency ?? "INR",
         validUntil: body.dueDate ? new Date(body.dueDate) : null,

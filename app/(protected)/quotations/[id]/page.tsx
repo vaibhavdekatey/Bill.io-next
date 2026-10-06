@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { pdf } from "@react-pdf/renderer";
 import BillPDF from "@/components/BillPDF";
 import type { PDFDocumentData } from "@/components/BillPDF";
+import { Share2, Check } from "lucide-react";
 
 type QuotationStatus = "DRAFT" | "SENT" | "PAID" | "CANCELLED" | "OVERDUE";
 
@@ -24,6 +25,7 @@ type QuotationItem = {
 type QuotationDetail = {
   id: string;
   number: string;
+  shareToken?: string | null;
   status: QuotationStatus;
   currency: string;
   createdAt: string;
@@ -183,6 +185,7 @@ export default function Quotation() {
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [converting, setConverting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const handleConvertToProject = async () => {
     try {
@@ -318,6 +321,31 @@ export default function Quotation() {
           </Link>
 
           <div className="flex flex-wrap items-center gap-2">
+            {quotation.shareToken && (
+              <button
+                onClick={() => {
+                  const shareUrl = `${window.location.origin}/view/quotation/${quotation.shareToken}`;
+                  navigator.clipboard.writeText(shareUrl);
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 2000);
+                }}
+                className="text-neutral-300 hover:text-white text-sm border border-neutral-800 px-5 py-2.5 rounded-full hover:border-neutral-600 transition-all cursor-pointer font-medium flex items-center gap-2"
+                title="Copy client shareable link"
+              >
+                {shareCopied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    Share Link
+                  </>
+                )}
+              </button>
+            )}
+
             <button
               onClick={() => router.push(`/quotations/new?edit=${quotation.id}`)}
               className="text-neutral-300 hover:text-white text-sm border border-neutral-800 px-5 py-2.5 rounded-full hover:border-neutral-600 transition-all cursor-pointer font-medium flex items-center gap-2"

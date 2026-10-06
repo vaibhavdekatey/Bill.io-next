@@ -10,6 +10,7 @@ import { pdf } from "@react-pdf/renderer";
 import BillPDF from "@/components/BillPDF";
 import type { PDFDocumentData } from "@/components/BillPDF";
 import PillButton from "@/components/PillButton";
+import { Share2, Check } from "lucide-react";
 
 type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELLED" | "OVERDUE";
 
@@ -24,6 +25,7 @@ type InvoiceItem = {
 type InvoiceDetail = {
   id: string;
   number: string;
+  shareToken?: string | null;
   status: InvoiceStatus;
   currency: string;
   issueDate: string;
@@ -83,6 +85,7 @@ export default function Invoice() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const handleDelete = async () => {
     try {
       setDeleting(true);
@@ -279,6 +282,31 @@ export default function Invoice() {
             Back to Invoices
           </Link>
           <div className="flex flex-wrap items-center gap-2">
+            {invoice.shareToken && (
+              <button
+                onClick={() => {
+                  const shareUrl = `${window.location.origin}/view/invoice/${invoice.shareToken}`;
+                  navigator.clipboard.writeText(shareUrl);
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 2000);
+                }}
+                className="text-neutral-300 hover:text-white text-sm border border-neutral-800 px-5 py-2.5 rounded-full hover:border-neutral-600 transition-all cursor-pointer font-medium flex items-center gap-2"
+                title="Copy client shareable link"
+              >
+                {shareCopied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    Share Link
+                  </>
+                )}
+              </button>
+            )}
+
             {/* Edit Button navigating to form with edit param */}
             <button
               onClick={() => router.push(`/invoices/new?edit=${invoice.id}`)}

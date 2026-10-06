@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateTotals,
+  generateShareToken,
   getOrganizationIdForUser,
   isOrgAdminOrOwner,
   normalize,
@@ -48,6 +49,15 @@ export const GET = (req: Request, context: any) =>
         { message: "Quotation not found", success: false },
         { status: 404 }
       );
+    }
+
+    if (!quotation.shareToken) {
+      const shareToken = generateShareToken();
+      await prisma.quotation.update({
+        where: { id: quotation.id },
+        data: { shareToken },
+      });
+      quotation.shareToken = shareToken;
     }
 
     return NextResponse.json(

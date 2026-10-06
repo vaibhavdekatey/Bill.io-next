@@ -1,8 +1,20 @@
 "use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import Silk from "@/components/Silk";
 import CustomButton from "@/components/CustomButton";
 
 const Landing = () => {
+  const { user, loading, onBoardingComplete } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace(onBoardingComplete ? "/dashboard" : "/onboarding");
+    }
+  }, [user, loading, onBoardingComplete, router]);
+
   return (
     <div className="bg-black min-h-screen w-full flex flex-col lg:flex-row text-white font-lexend p-6 lg:px-12 xl:px-[12em] gap-12 lg:gap-0">
       <div className="flex flex-col justify-between w-full lg:w-1/2 min-h-[70vh] lg:min-h-0 py-4 lg:py-0">
@@ -31,18 +43,34 @@ const Landing = () => {
             agencies. Seamlessly manage clients, and automate your invoicing so
             you can focus on the work that actually matters.
           </h2>
-          <div>
-            <p className="text-white/70 ml-2 mb-1 tracking-wider font-light text-base">
-              Get started Now!
-            </p>
-            <CustomButton title="Sign Up" href="/register" disabled={false} />
-          </div>
-          <div>
-            <p className="text-white/70 ml-2 mb-1 tracking-wider font-light text-base">
-              Already Registered?
-            </p>
-            <CustomButton title="Log In" href="/login" disabled={false} />
-          </div>
+
+          {user ? (
+            <div>
+              <p className="text-white/70 ml-2 mb-1 tracking-wider font-light text-base">
+                Welcome back, {user.name || user.email}!
+              </p>
+              <CustomButton
+                title="Go to Dashboard"
+                href={onBoardingComplete ? "/dashboard" : "/onboarding"}
+                disabled={false}
+              />
+            </div>
+          ) : (
+            <>
+              <div>
+                <p className="text-white/70 ml-2 mb-1 tracking-wider font-light text-base">
+                  Get started Now!
+                </p>
+                <CustomButton title="Sign Up" href="/register" disabled={false} />
+              </div>
+              <div>
+                <p className="text-white/70 ml-2 mb-1 tracking-wider font-light text-base">
+                  Already Registered?
+                </p>
+                <CustomButton title="Log In" href="/login" disabled={false} />
+              </div>
+            </>
+          )}
         </div>
       </div>
       <div className="w-full lg:w-1/2 h-[50vh] lg:h-auto rounded-3xl lg:rounded-4xl overflow-hidden mt-8 lg:mt-0">
