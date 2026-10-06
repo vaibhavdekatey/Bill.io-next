@@ -115,15 +115,15 @@ const Dashboard = () => {
                 <Link href="/clients" className="ml-2 text-white hover:underline transition-all">Add your first client →</Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {stats.recentClients.map((client: any) => (
-                  <Link href={`/clients/${client.id}`} key={client.id} className="group p-6 border border-white/5 hover:border-white/30 bg-neutral-800/10 rounded-xl transition-all duration-300 flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0060BF] to-[#003060] flex items-center justify-center text-lg shrink-0 border border-white/10 group-hover:border-white/30 transition-all">
+                  <Link href={`/clients/${client.id}`} key={client.id} className="group p-4 border border-white/5 hover:border-white/30 bg-neutral-800/10 rounded-xl transition-all duration-300 flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0060BF] to-[#003060] flex items-center justify-center text-sm font-medium shrink-0 border border-white/10 group-hover:border-white/30 transition-all">
                       {client.name.substring(0, 2).toUpperCase()}
                     </div>
-                    <div className="flex flex-col truncate">
-                      <span className="text-lg font-light text-white truncate group-hover:text-blue-200 transition-colors">{client.name}</span>
-                      <span className="text-sm text-neutral-400 truncate mt-0.5">{client.email || client.companyName || "No contact info"}</span>
+                    <div className="flex flex-col truncate min-w-0 flex-1">
+                      <span className="text-base font-normal text-white truncate group-hover:text-blue-200 transition-colors">{client.name}</span>
+                      <span className="text-xs text-neutral-400 truncate mt-0.5">{client.email || client.companyName || "No contact info"}</span>
                     </div>
                   </Link>
                 ))}

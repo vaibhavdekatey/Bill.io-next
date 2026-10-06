@@ -7,8 +7,22 @@ import TimeLogo from "../assets/icons/time.svg";
 import TeamLogo from "../assets/icons/team.svg";
 import CogLogo from "../assets/icons/cog.svg";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-;
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
+
+const getInitials = (name?: string | null, email?: string | null) => {
+  if (name && name.trim()) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  if (email && email.trim()) {
+    return email[0].toUpperCase();
+  }
+  return "U";
+};
 
 type NavItem = {
   label: string;
@@ -43,6 +57,16 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { logout, user, organization } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClose();
+    await logout();
+    router.push("/login");
+  };
+
   const isActive = (href: string) => {
     return (
       pathname === href || pathname.startsWith(href + "/")
@@ -103,34 +127,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           })}
         </div>
       </div>
-      <div className="flex flex-row justify-between gap-x-2">
-        <Link href={"/profile"}
-          className=" w-full p-3 pr-4 flex flex-row gap-x-3 border border-white/10 hover:border-white/20 bg-neutral-800/10 hover:bg-neutral-600/20 rounded-xl transition-all duration-500 ease-in-out cursor-pointer"
-        >
-          <div className="rounded-full bg-linear-to-b from-neutral-500 to-neutral-800 aspect-square h-full "></div>
-          <div className="flex flex-col">
-            <span className="uppercase font-light ">{user?.name}</span>
-            <span className="mt-1 px-3 py-0.5 rounded-full text-xs font-medium bg-neutral-800 text-neutral-300 w-fit border border-neutral-700">
-              {organization?.title}
-            </span>
-          </div>
-        </Link>
-        {/*<div
-          onClick={logout}
-          className=" w-fit flex justify-center items-center aspect-square text-red-400 border border-white/30 hover:border-white/50 bg-neutral-800/10 hover:bg-neutral-600 rounded-xl transition-all duration-500 ease-in-out cursor-pointer"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
+      <div className="pt-4 border-t border-neutral-800/80 mt-6">
+        <div className="flex items-stretch gap-2">
+          <Link
+            href="/profile"
+            onClick={() => onClose()}
+            className="group flex-1 min-w-0 flex items-center gap-3 p-2.5 rounded-xl border border-neutral-800/80 bg-neutral-900/40 hover:bg-neutral-800/60 hover:border-neutral-700/80 transition-all duration-200 cursor-pointer"
           >
-            <path
-              fill="currentColor"
-              d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h6q.425 0 .713.288T12 4t-.288.713T11 5H5v14h6q.425 0 .713.288T12 20t-.288.713T11 21zm12.175-8H10q-.425 0-.712-.288T9 12t.288-.712T10 11h7.175L15.3 9.125q-.275-.275-.275-.675t.275-.7t.7-.313t.725.288L20.3 11.3q.3.3.3.7t-.3.7l-3.575 3.575q-.3.3-.712.288t-.713-.313q-.275-.3-.262-.712t.287-.688z"
-            />
-          </svg>
-        </div>*/}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/50 flex items-center justify-center text-xs font-semibold text-neutral-200 shrink-0 shadow-inner group-hover:border-neutral-500 transition-colors">
+              {getInitials(user?.name, user?.email)}
+            </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors truncate">
+                {user?.name || "Account"}
+              </span>
+              <span className="text-xs text-neutral-400 group-hover:text-neutral-300 transition-colors truncate">
+                {organization?.title || organization?.Organization?.name || user?.email || "View profile"}
+              </span>
+            </div>
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            aria-label="Log out"
+            className="w-11 flex items-center justify-center text-neutral-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl border border-neutral-800/80 hover:border-red-500/30 transition-all duration-200 shrink-0 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </aside>
     </>

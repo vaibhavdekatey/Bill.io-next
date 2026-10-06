@@ -19,7 +19,7 @@ const Card = ({
 }: CardProps) => {
   return (
     <div
-      className={`${className} flex flex-col justify-between rounded-xl border border-transparent hover:border-white h-[18em] w-full p-8 transition-all ease-in-out duration-500 `}
+      className={`${className} flex flex-col justify-between rounded-xl bg-origin-border bg-no-repeat border border-transparent hover:border-white h-[18em] w-full p-8 transition-all ease-in-out duration-500`}
     >
       <div className="flex flex-col gap-y-2">
         <p className="text-base">{heading}</p>
