@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import Link from "next/link";
+import { TimelineSkeleton } from "@/components/Skeleton";
 
 type TimelineActivity = {
   id: string;
@@ -124,9 +125,7 @@ export default function TimelinePage() {
         {/* Timeline Schedule */}
         <div className="flex flex-col gap-4">
           {loading ? (
-            <div className="text-neutral-500 text-sm py-12 text-center font-light">
-              Aggregating milestones and schedule...
-            </div>
+            <TimelineSkeleton count={4} />
           ) : activeFilter === "PROJECT" ? (
             /* Projects Grid View */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

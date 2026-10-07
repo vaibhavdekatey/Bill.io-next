@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import PillButton from "@/components/PillButton";
+import { TableSkeleton } from "@/components/Skeleton";
 
 type TeamMember = {
   id: string;
@@ -200,7 +201,9 @@ export default function TeamPage() {
           </div>
 
           {loading ? (
-            <div className="text-neutral-500 text-sm py-8 text-center font-light">Loading members...</div>
+            <div className="py-4">
+              <TableSkeleton rows={4} cols={5} />
+            </div>
           ) : members.length === 0 ? (
             <div className="text-neutral-500 text-sm py-8 text-center font-light">No members found</div>
           ) : (

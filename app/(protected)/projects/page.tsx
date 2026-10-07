@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-;
 import api from "@/lib/axios";
+import { TableSkeleton } from "@/components/Skeleton";
 
 type Project = {
   id: string;
@@ -94,7 +94,9 @@ const Projects = () => {
 
         {/* List Section */}
         {loading ? (
-          <div className="w-full h-64 bg-neutral-950 border border-neutral-800 rounded-3xl animate-pulse" />
+          <div className="bg-neutral-950 border border-neutral-800 rounded-3xl overflow-hidden shadow-xl w-full">
+            <TableSkeleton rows={5} cols={6} />
+          </div>
         ) : projects.length === 0 && !error ? (
           <div className="w-full h-64 bg-neutral-950 border border-neutral-800 rounded-3xl flex flex-col items-center justify-center gap-4">
             <span className="text-neutral-500 text-sm">No projects found.</span>

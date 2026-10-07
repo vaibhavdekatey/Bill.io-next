@@ -11,6 +11,7 @@ import BillPDF from "@/components/BillPDF";
 import type { PDFDocumentData } from "@/components/BillPDF";
 import PillButton from "@/components/PillButton";
 import { Share2, Check } from "lucide-react";
+import { DocumentSkeleton } from "@/components/Skeleton";
 
 type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "CANCELLED" | "OVERDUE";
 
@@ -221,12 +222,7 @@ export default function Invoice() {
   };
 
   if (loading) {
-    return (
-      <div className="w-full py-8 px-12 flex flex-col gap-6 animate-pulse">
-        <div className="h-10 bg-neutral-800 rounded w-1/4" />
-        <div className="h-[500px] bg-neutral-900 border border-neutral-800 rounded-2xl" />
-      </div>
-    );
+    return <DocumentSkeleton />;
   }
 
   if (error || !invoice) {

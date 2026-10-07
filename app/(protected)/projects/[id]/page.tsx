@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 ;
 import api from "@/lib/axios";
 import PillButton from "@/components/PillButton";
+import { ProjectDetailSkeleton } from "@/components/Skeleton";
 
 type ProjectItem = {
   id: string;
@@ -167,12 +168,7 @@ export default function ProjectDetail() {
   };
 
   if (loading) {
-    return (
-      <div className="w-full py-8 px-12 flex flex-col gap-6 animate-pulse">
-        <div className="h-10 bg-neutral-900 rounded-xl w-1/3" />
-        <div className="h-64 bg-neutral-900 rounded-3xl w-full" />
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   if (!project) {

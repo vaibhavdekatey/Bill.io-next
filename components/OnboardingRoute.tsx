@@ -1,20 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useRouter } from "next/navigation"; import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import LoadingScreen from "./LoadingScreen";
 
 const OnboardingRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, onBoardingComplete } = useAuth();
+  const router = useRouter();
 
-  if (loading)
-    return (
-      <div className="bg-black w-screen h-screen overflow-hidden flex justify-center items-center font-2xl ">
-        Loading...
-      </div>
-    );
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.replace("/login");
+      } else if (onBoardingComplete) {
+        router.replace("/dashboard");
+      }
+    }
+  }, [loading, user, onBoardingComplete, router]);
 
-  if (!user) return (()=>{ const r=useRouter(); useEffect(()=>{r.replace("/login")},[]); return null; })();
-
-  if (onBoardingComplete) return (()=>{ const r=useRouter(); useEffect(()=>{r.replace("/dashboard")},[]); return null; })();
+  if (loading || !user || onBoardingComplete) {
+    return <LoadingScreen message="Loading onboarding..." />;
+  }
 
   return <>{children}</>;
 };

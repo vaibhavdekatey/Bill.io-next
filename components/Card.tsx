@@ -7,6 +7,7 @@ type CardProps = {
   description?: string;
   hrefTitle?: string;
   href?: string;
+  isLoading?: boolean;
 };
 
 const Card = ({
@@ -16,6 +17,7 @@ const Card = ({
   description = "Clients with invoices, quotations, and projects",
   hrefTitle = "View Clients",
   href = "#",
+  isLoading = false,
 }: CardProps) => {
   return (
     <div
@@ -23,7 +25,11 @@ const Card = ({
     >
       <div className="flex flex-col gap-y-2">
         <p className="text-base">{heading}</p>
-        <p className="text-6xl font-extralight ">{num}</p>
+        {isLoading ? (
+          <div className="h-14 w-20 bg-white/20 rounded-lg animate-pulse my-1" />
+        ) : (
+          <p className="text-6xl font-extralight ">{num}</p>
+        )}
         <p className="text-base">{description}</p>
       </div>
       <PillLink href={href} hrefTitle={hrefTitle} arrow={true} />

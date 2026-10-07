@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 ;
 import api from "@/lib/axios";
 import PillButton from "@/components/PillButton";
+import { ClientProfileSkeleton } from "@/components/Skeleton";
 
 type ClientDetailType = {
   id: string;
@@ -185,11 +186,7 @@ export default function ClientDetail() {
   };
 
   if (loading) {
-    return (
-      <div className="p-8 text-neutral-400 font-mono text-sm animate-pulse">
-        Loading client...
-      </div>
-    );
+    return <ClientProfileSkeleton />;
   }
 
   if (error || !client) {

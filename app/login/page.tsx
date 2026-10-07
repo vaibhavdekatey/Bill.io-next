@@ -4,10 +4,17 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import CustomGoogleButton from "@/components/CustomGoogleButton";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Login = () => {
   const { login, user, loading: authLoading, onBoardingComplete } = useAuth();
   const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -15,12 +22,9 @@ const Login = () => {
     }
   }, [user, authLoading, onBoardingComplete, router]);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  if (authLoading || user) {
+    return <LoadingScreen message="Checking session..." />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

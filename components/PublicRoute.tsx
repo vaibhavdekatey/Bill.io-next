@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import LoadingScreen from "./LoadingScreen";
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, onBoardingComplete } = useAuth();
@@ -12,12 +13,9 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user, loading, onBoardingComplete, router]);
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen font-semibold text-lg">
-        Loading...
-      </div>
-    );
+  if (loading) {
+    return <LoadingScreen message="Loading..." />;
+  }
 
   if (user) {
     return null;

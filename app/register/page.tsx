@@ -4,16 +4,12 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import CustomGoogleButton from "@/components/CustomGoogleButton";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Register = () => {
   const { register, user, loading: authLoading, onBoardingComplete } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      router.replace(onBoardingComplete ? "/dashboard" : "/onboarding");
-    }
-  }, [user, authLoading, onBoardingComplete, router]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -22,6 +18,16 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(onBoardingComplete ? "/dashboard" : "/onboarding");
+    }
+  }, [user, authLoading, onBoardingComplete, router]);
+
+  if (authLoading || user) {
+    return <LoadingScreen message="Checking session..." />;
+  }
 
   const passwordError =
     confPassword && password !== confPassword ? "Passwords do not match" : "";

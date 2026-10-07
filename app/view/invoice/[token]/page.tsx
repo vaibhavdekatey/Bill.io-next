@@ -6,6 +6,7 @@ import { pdf } from "@react-pdf/renderer";
 import BillPDF, { PDFDocumentData } from "@/components/BillPDF";
 import { formatCurrency } from "@/lib/utils/calculations";
 import { Download, Printer, CheckCircle, Clock, AlertCircle, Building, Copy, Check } from "lucide-react";
+import { DocumentSkeleton } from "@/components/Skeleton";
 
 export default function PublicInvoicePage({
   params,
@@ -126,11 +127,8 @@ export default function PublicInvoicePage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 font-lexend">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
-          <p className="text-sm text-neutral-400 font-light">Loading invoice details...</p>
-        </div>
+      <div className="min-h-screen bg-black text-white p-4 font-lexend">
+        <DocumentSkeleton isPublic />
       </div>
     );
   }

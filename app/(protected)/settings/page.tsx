@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import { useAuth } from "@/context/AuthContext";
+import { FormSkeleton } from "@/components/Skeleton";
 
 type BankDetails = {
   bankName: string;
@@ -142,8 +143,14 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <main className="w-full py-12 px-4 md:px-12 flex justify-center items-center">
-        <div className="text-neutral-400 font-light">Loading settings...</div>
+      <main className="w-full py-8 px-4 md:px-12">
+        <div className="flex flex-col w-full max-w-4xl mx-auto gap-8">
+          <div className="flex flex-col gap-2 animate-pulse">
+            <div className="h-9 w-40 bg-neutral-800 rounded-xl" />
+            <div className="h-4 w-72 bg-neutral-800/60 rounded" />
+          </div>
+          <FormSkeleton sections={3} />
+        </div>
       </main>
     );
   }
