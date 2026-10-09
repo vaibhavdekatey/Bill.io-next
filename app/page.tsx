@@ -50,17 +50,18 @@ const Landing = () => {
           ) : (
             <>
               <div>
-                <p className="text-white/70 ml-2 mb-1 tracking-wider font-light text-base">
+                <p className="text-white/70 mb-1 tracking-wider font-light text-base">
                   Get started Now!
                 </p>
                 <CustomButton
+                  variant="alt"
                   title="Sign Up"
                   href="/register"
                   disabled={false}
                 />
               </div>
               <div>
-                <p className="text-white/70 ml-2 mb-1 tracking-wider font-light text-base">
+                <p className="text-white/70 mb-1 tracking-wider font-light text-base">
                   Already Registered?
                 </p>
                 <CustomButton title="Log In" href="/login" disabled={false} />
