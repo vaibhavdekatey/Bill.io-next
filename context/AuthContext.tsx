@@ -35,8 +35,16 @@ interface organization {
 interface AuthContextType {
   user: User | null;
   accessToken: string | null; // Kept for interface compatibility, but unused
-  login: (email: string, password: string) => Promise<{ onBoardingComplete: boolean }>;
-  register: (name: string, email: string, password: string, phoneNumber?: string) => Promise<{ onBoardingComplete: boolean }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ onBoardingComplete: boolean }>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    phoneNumber?: string,
+  ) => Promise<{ onBoardingComplete: boolean }>;
   googleLogin: (idToken: string) => Promise<{ onBoardingComplete: boolean }>;
   logout: () => Promise<void>;
   loading: boolean;
@@ -62,7 +70,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       if (session?.user) {
         setUser(session.user as any);
-        setOnboardingComplete((session.user as any).onBoardingComplete || false);
+        setOnboardingComplete(
+          (session.user as any).onBoardingComplete || false,
+        );
         setOrganization((session.user as any).organization || null);
       } else {
         setUser(null);
@@ -83,30 +93,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw { response: { data: { message: "Invalid credentials" } } };
     }
     const currentSession = await getSession();
-    const isOnboarded = (currentSession?.user as any)?.onBoardingComplete || false;
+    const sessionUser = currentSession?.user as any;
+    if (sessionUser) {
+      setUser(sessionUser);
+      setOrganization(sessionUser.organization || null);
+    }
+    const isOnboarded = sessionUser?.onBoardingComplete || false;
     setOnboardingComplete(isOnboarded);
     return { onBoardingComplete: isOnboarded };
   };
 
-  const register = async (name: string, email: string, password: string, phoneNumber?: string) => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    phoneNumber?: string,
+  ) => {
     const res = await api.post("/auth/register", {
       name,
       email,
       password,
       phoneNumber,
     });
-    
+
     if (res.data.error) {
       throw { response: { data: { message: res.data.error } } };
     }
 
-    const signinRes = await signIn("credentials", { email, password, redirect: false });
+    const signinRes = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
     if (signinRes?.error) {
-      throw { response: { data: { message: "Login failed after registration" } } };
+      throw {
+        response: { data: { message: "Login failed after registration" } },
+      };
     }
 
     const currentSession = await getSession();
-    const isOnboarded = (currentSession?.user as any)?.onBoardingComplete || false;
+    const sessionUser = currentSession?.user as any;
+    if (sessionUser) {
+      setUser(sessionUser);
+      setOrganization(sessionUser.organization || null);
+    }
+    const isOnboarded = sessionUser?.onBoardingComplete || false;
     setOnboardingComplete(isOnboarded);
     return { onBoardingComplete: isOnboarded };
   };
@@ -115,6 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await signOut({ redirect: false });
     setUser(null);
     setOnboardingComplete(false);
+    setOrganization(null);
   };
 
   const googleLogin = async (idToken: string) => {

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-;
 import api from "@/lib/axios";
+import LoadingScreen from "@/components/LoadingScreen";
 
 type AccountType = "freelancer" | "agency";
 
@@ -55,7 +55,13 @@ const ACCOUNT_TYPES: {
 ];
 
 const Onboarding = () => {
-  const { user, setOnboardingComplete, logout } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    onBoardingComplete,
+    setOnboardingComplete,
+    logout,
+  } = useAuth();
   const router = useRouter();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -72,6 +78,21 @@ const Onboarding = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [address, setAddress] = useState("");
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        router.replace("/login");
+      } else if (onBoardingComplete) {
+        router.replace("/dashboard");
+      }
+    }
+  }, [user, authLoading, onBoardingComplete, router]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
+  };
 
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +132,10 @@ const Onboarding = () => {
     router.push("/dashboard");
   };
 
+  if (authLoading || !user || onBoardingComplete) {
+    return <LoadingScreen message="Checking session..." />;
+  }
+
   return (
     <div className="bg-black h-screen w-screen flex flex-col items-center justify-center text-white font-lexend p-6 relative overflow-x-hidden">
       <div className="absolute inset-4  bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-full blur-3xl opacity-40 group-hover:opacity-100 transition duration-1000 my-36 mx-[30vw]" />
@@ -122,7 +147,7 @@ const Onboarding = () => {
         />
       </div>
       <div
-        onClick={logout}
+        onClick={handleLogout}
         className="absolute p-3 text-red-400 border border-white/30 hover:border-white/50 bg-neutral-800/40 hover:bg-neutral-600 rounded-xl top-8 right-8 transition-all duration-500 ease-in-out cursor-pointer"
       >
         <svg
@@ -273,7 +298,9 @@ const Onboarding = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-y-2">
-                    <label className="text-sm text-white/60">Phone number</label>
+                    <label className="text-sm text-white/60">
+                      Phone number
+                    </label>
                     <input
                       className="bg-neutral-900 border border-neutral-800 focus:border-white/40 outline-none p-4 rounded-lg w-full transition-colors duration-200"
                       placeholder="+1 (555) 000-0000"
@@ -283,7 +310,9 @@ const Onboarding = () => {
                     />
                   </div>
                   <div className="flex flex-col gap-y-2">
-                    <label className="text-sm text-white/60">Website (Optional)</label>
+                    <label className="text-sm text-white/60">
+                      Website (Optional)
+                    </label>
                     <input
                       className="bg-neutral-900 border border-neutral-800 focus:border-white/40 outline-none p-4 rounded-lg w-full transition-colors duration-200"
                       placeholder="https://acmecorp.com"
@@ -311,17 +340,6 @@ const Onboarding = () => {
               {error && <p className="text-red-400 text-sm">{error}</p>}
 
               <div className="flex gap-x-3">
-                {/* <button
-                type="button"
-                onClick={() => {
-                  setError("");
-                  setStep(3);
-                  setOnboardingComplete(true);
-                  }}
-                  className="flex-1 border border-neutral-700 text-white/60 hover:text-white hover:border-neutral-500 rounded-lg py-3 transition-all duration-300 text-sm"
-                  >
-                  Skip for now
-                  </button> */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -329,9 +347,25 @@ const Onboarding = () => {
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin h-5 w-5 text-current"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Saving...
                     </span>
@@ -343,7 +377,7 @@ const Onboarding = () => {
             </form>
           )}
 
-          {/* ── STEP 3: All Set ── */}
+          {/* STEP 3: All Set */}
           {step === 3 && (
             <div className="flex flex-col items-center text-center gap-y-6 animate-fade-in">
               {/* Check animation */}
